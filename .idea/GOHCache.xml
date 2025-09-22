@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoORMHelperCache">
+    <option name="schemaMapping">
+      <map>
+        <entry key="Config">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/config/config.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ConfigResponse">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/delivery/http/dto/response.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ConfigService">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/service/config_service.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="GitRepo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/repository/gitrepo.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="PropertySource">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/delivery/http/dto/response.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Queue">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/service/queue.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Server">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/delivery/http/handler.go" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="scannedPathMapping">
+      <map>
+        <entry key="file://$PROJECT_DIR$/cmd/conflect/conflect.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758501732326" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/cmd/server/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758501568807" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/config/config.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758502874549" />
+              <option name="schema">
+                <list>
+                  <option value="Config" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/dto/response.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758505635775" />
+              <option name="schema">
+                <list>
+                  <option value="ConfigResponse" />
+                  <option value="PropertySource" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/handler.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758505632082" />
+              <option name="schema">
+                <list>
+                  <option value="Server" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/parse.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758505318367" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/repository/gitrepo.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758505274043" />
+              <option name="schema">
+                <list>
+                  <option value="GitRepo" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/service/config_service.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758504392002" />
+              <option name="schema">
+                <list>
+                  <option value="ConfigService" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/service/queue.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758501638142" />
+              <option name="schema">
+                <list>
+                  <option value="Queue" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/worker/worker.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758501668279" />
+            </ScannedPath>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="tableStructMapping">
+      <map>
+        <entry key="config" value="Config" />
+        <entry key="config_response" value="ConfigResponse" />
+        <entry key="config_service" value="ConfigService" />
+        <entry key="git_repo" value="GitRepo" />
+        <entry key="property_source" value="PropertySource" />
+        <entry key="queue" value="Queue" />
+        <entry key="server" value="Server" />
+      </map>
+    </option>
+    <option name="lastTimeChecked" value="1758500772880" />
+  </component>
+</project>
