@@ -18,13 +18,10 @@ package service
 import (
 	"fmt"
 	"log"
-	"path/filepath"
 
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http/dto"
-	"github.com/KAnggara75/conflect/internal/helper"
 	"github.com/KAnggara75/conflect/internal/repository"
-	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type ConfigService struct {
@@ -53,28 +50,22 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 		Profiles: []string{env},
 	}
 
-	var refName plumbing.ReferenceName
 	if label == "" {
-		def, err := c.repo.DefaultBranch()
-		if err != nil {
-			log.Println(err)
-			return response
-		}
-		refName = plumbing.NewRemoteReferenceName("origin", def)
-	} else {
-		refName = plumbing.NewRemoteReferenceName("origin", label)
+		label = c.cfg.DefaultBranch
 	}
 
-	candidates := c.generateConfigCandidates(appName, env)
+	response.Label = label
 
-	data, err := c.findAndReadAllConfigs(refName.String(), candidates)
-	if err != nil {
-		log.Println(err)
-		return response
-	}
-	response.PropertySources = data
+	_ = c.generateConfigCandidates(appName, env)
 
-	hash, err := c.repo.GetCommitHash(refName)
+	//data, err := c.findAndReadAllConfigs(label, env, candidates)
+	//if err != nil {
+	//	log.Println(err)
+	//	return response
+	//}
+	//response.PropertySources = data
+
+	hash, err := c.repo.GetCommitHashFromBranch(label)
 	if err == nil {
 		response.Version = hash
 	}
@@ -88,7 +79,7 @@ func (c *ConfigService) generateConfigCandidates(appName, env string) []string {
 
 	var files []string
 	for _, p := range prefixes {
-		files = append(files, fmt.Sprintf("%s/%s-%s", env, p, env))
+		files = append(files, fmt.Sprintf("%s-%s", p, env))
 	}
 
 	var candidates []string
