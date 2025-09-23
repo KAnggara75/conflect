@@ -19,11 +19,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"path/filepath"
 	"strings"
 
 	"github.com/KAnggara75/conflect/internal/config"
-	"github.com/KAnggara75/conflect/internal/delivery/http/dto"
 	"github.com/KAnggara75/conflect/internal/service"
 )
 
@@ -62,11 +60,6 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var propertySources []dto.PropertySource
-
-	// commit hash (version). If error, leave empty string.
-	version, _ := s.configService.GetCommitHash()
-
 	appName := parts[0]
 	env := parts[1]
 	label := ""
@@ -74,51 +67,7 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 		label = parts[2]
 	}
 
-	prefixes := []string{appName, "application"}
-	extensionList := []string{".yaml", ".yml", ".json", ".properties"}
-
-	for _, prefix := range prefixes {
-		// try with label if exists
-		config, err := s.configService.LoadConfig(app, env, label)
-		if err != nil && label != "" {
-			// fallback: try without label
-			config, err = s.configService.LoadConfig(app, env, "")
-		}
-
-		filename := fmt.Sprintf("%s-%s", prefix, env)
-		if label != "" {
-			filename = fmt.Sprintf("%s-%s", filename, *label)
-		}
-
-		for _, ext := range extensionList {
-			data, err := s.configService.GetFile(env, filename+ext)
-			if err != nil {
-				continue
-			}
-
-			parsed, err := parseConfigFile(data, ext)
-			if err != nil {
-				// skip file if parse fails
-				continue
-			}
-
-			// name must be "dev/pakaiwa-dev.yaml" style (relative path)
-			rel := filepath.ToSlash(filepath.Join(env, filename+ext))
-
-			propertySources = append(propertySources, dto.PropertySource{
-				Name:   rel,
-				Source: parsed,
-			})
-		}
-	}
-
-	resp := dto.ConfigResponse{
-		Name:            appName,
-		Profiles:        []string{env},
-		Label:           label,
-		Version:         version,
-		PropertySources: propertySources,
-	}
+	resp := s.configService.LoadConfig(appName, env, label)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

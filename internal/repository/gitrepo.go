@@ -17,16 +17,18 @@ package repository
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type GitRepo struct {
 	Path string
 	URL  string
+	repo *git.Repository
 }
 
 func NewGitRepo(path, url string) *GitRepo {
@@ -34,43 +36,42 @@ func NewGitRepo(path, url string) *GitRepo {
 }
 
 func (g *GitRepo) EnsureCloned() error {
-	// cek apakah folder sudah ada
 	if _, err := os.Stat(g.Path); os.IsNotExist(err) {
-		log.Println("Cloning repo...")
-		cmd := exec.Command("git", "clone", g.URL, g.Path)
-		cmd.Env = append(os.Environ(),
-			"GIT_TERMINAL_PROMPT=0",
-		)
-		out, err := cmd.CombinedOutput()
+		fmt.Println("Cloning repo to", g.Path)
+		r, err := git.PlainClone(g.Path, false, &git.CloneOptions{
+			URL:      g.URL,
+			Progress: os.Stdout,
+		})
 		if err != nil {
-			return fmt.Errorf("git clone failed: %v, output: %s", err, string(out))
+			return err
 		}
-		log.Println("Clone success")
+		g.repo = r
 		return nil
 	}
-
-	// kalau folder ada, pastikan itu repo git
-	if _, err := os.Stat(filepath.Join(g.Path, ".git")); err == nil {
-		log.Println("Repo already cloned")
-		return nil
-	}
-
-	// folder ada tapi bukan repo git → hapus & clone ulang
-	log.Println("Directory exists but not a git repo, removing and recloning...")
-	if err := os.RemoveAll(g.Path); err != nil {
-		return fmt.Errorf("failed to remove existing dir: %v", err)
-	}
-
-	cmd := exec.Command("git", "clone", g.URL, g.Path)
-	cmd.Env = append(os.Environ(),
-		"GIT_TERMINAL_PROMPT=0",
-	)
-	out, err := cmd.CombinedOutput()
+	r, err := git.PlainOpen(g.Path)
 	if err != nil {
-		return fmt.Errorf("git clone retry failed: %v, output: %s", err, string(out))
+		return err
 	}
-	log.Println("Clone success after cleanup")
+	g.repo = r
 	return nil
+}
+
+func (g *GitRepo) DefaultBranch() (string, error) {
+	rem, err := g.repo.Remote("origin")
+	if err != nil {
+		return "", err
+	}
+	refs, err := rem.List(&git.ListOptions{})
+	if err != nil {
+		return "", err
+	}
+	for _, r := range refs {
+		if r.Type() == plumbing.SymbolicReference && r.Name().String() == "HEAD" {
+			return strings.TrimPrefix(r.Target().String(), "refs/heads/"), nil
+		}
+	}
+
+	return "main", nil
 }
 
 func (g *GitRepo) Pull() error {
@@ -81,11 +82,51 @@ func (g *GitRepo) Pull() error {
 	return cmd.Run()
 }
 
-func (g *GitRepo) GetCommitHash() (string, error) {
-	cmd := exec.Command("git", "-C", g.Path, "rev-parse", "HEAD")
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("git rev-parse failed: %v, output: %s", err, string(out))
+func (g *GitRepo) GetCommitHash(label string) (string, error) {
+	var refName plumbing.ReferenceName
+	if label == "" {
+		def, err := g.DefaultBranch()
+		if err != nil {
+			return "", err
+		}
+		refName = plumbing.NewRemoteReferenceName("origin", def)
+	} else {
+		refName = plumbing.NewRemoteReferenceName("origin", label)
 	}
-	return strings.TrimSpace(string(out)), nil
+
+	ref, err := g.repo.Reference(refName, true)
+	if err != nil {
+		return "", err
+	}
+	return ref.Hash().String(), nil
+}
+
+func (g *GitRepo) GetFile(refName, filePath string) ([]byte, error) {
+
+	commit, err := g.repo.ResolveRevision(plumbing.Revision(refName))
+	if err != nil {
+		return nil, err
+	}
+
+	// get tree
+	commitObj, err := g.repo.CommitObject(*commit)
+	if err != nil {
+		return nil, err
+	}
+	tree, err := commitObj.Tree()
+	if err != nil {
+		return nil, err
+	}
+
+	// find file
+	entry, err := tree.File(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	contents, err := entry.Contents()
+	if err != nil {
+		return nil, err
+	}
+	return []byte(contents), nil
 }

@@ -31,7 +31,7 @@ type Config struct {
 
 func Load() *Config {
 	cwd, _ := os.Getwd()
-	defaultRepo := filepath.Join(cwd, "repo")
+	defaultRepo := filepath.Join(cwd, "tmp/repo")
 	repoPathFile := getEnv("REPO_PATH_FILE", defaultRepo)
 	webhookSecretFile := getEnv("WEBHOOK_SECRET_FILE", "")
 

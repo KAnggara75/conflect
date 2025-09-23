@@ -19,7 +19,7 @@ type ConfigResponse struct {
 	Name            string           `json:"name"`
 	Profiles        []string         `json:"profiles"`
 	Label           string           `json:"label,omitempty"`
-	Version         string           `json:"version"`
+	Version         string           `json:"version,omitempty"`
 	PropertySources []PropertySource `json:"propertySources"`
 }
 

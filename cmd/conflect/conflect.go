@@ -21,7 +21,6 @@ import (
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http"
 	"github.com/KAnggara75/conflect/internal/service"
-	"github.com/KAnggara75/conflect/internal/worker"
 )
 
 func main() {
@@ -32,7 +31,7 @@ func main() {
 	configService := service.NewConfigService(cfg, queue)
 
 	// start worker
-	go worker.Start(queue, configService)
+	//go worker.Start(queue, configService)
 
 	// start HTTP server
 	server := http.NewServer(cfg, queue, configService)

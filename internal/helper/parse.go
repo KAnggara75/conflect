@@ -26,7 +26,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func parseConfigFile(data []byte, ext string) (map[string]interface{}, error) {
+func ParseFile(data []byte, ext string) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
 
 	switch ext {

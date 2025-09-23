@@ -18,13 +18,13 @@ package service
 import (
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http/dto"
 	"github.com/KAnggara75/conflect/internal/helper"
 	"github.com/KAnggara75/conflect/internal/repository"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type ConfigService struct {
@@ -46,62 +46,90 @@ func (c *ConfigService) UpdateRepo() error {
 	return c.repo.Pull()
 }
 
-func (c *ConfigService) GetFile(env string, filename string) ([]byte, error) {
-	full := filepath.Join(c.cfg.RepoPath, env, filename)
-	log.Println(os.ReadFile(full))
-	return os.ReadFile(full)
-}
+func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigResponse {
 
-func (c *ConfigService) GetCommitHash() (string, error) {
-	return c.repo.GetCommitHash()
-}
+	response := &dto.ConfigResponse{
+		Name:     appName,
+		Profiles: []string{env},
+	}
 
-func (c *ConfigService) LoadConfig(app, env, label string) (*ConfigResponse, error) {
-	basePath := c.repo.Path
-	var dir string
-	if label != "" {
-		dir = filepath.Join(basePath, label, env)
+	var refName string
+	if label == "" {
+		def, err := c.repo.DefaultBranch()
+		if err != nil {
+			log.Println(err)
+			return response
+		}
+		refName = plumbing.NewRemoteReferenceName("origin", def).String()
 	} else {
-		dir = filepath.Join(basePath, env)
+		refName = plumbing.NewRemoteReferenceName("origin", label).String()
 	}
 
-	// check dir exists
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return nil, fmt.Errorf("directory not found: %s", dir)
+	candidates := c.generateConfigCandidates(appName, env)
+
+	data, err := c.findAndReadAllConfigs(refName, candidates)
+	if err != nil {
+		log.Println(err)
+		return response
+	}
+	response.PropertySources = data
+
+	hash, err := c.repo.GetCommitHash(refName)
+	if err == nil {
+		response.Version = hash
 	}
 
-	files := []string{
-		fmt.Sprintf("%s-%s.yaml", app, env),
-		fmt.Sprintf("application-%s.yaml", env),
-		fmt.Sprintf("%s-%s.json", app, env),
-		fmt.Sprintf("application-%s.json", env),
-		fmt.Sprintf("%s-%s.properties", app, env),
-		fmt.Sprintf("application-%s.properties", env),
+	return response
+}
+
+func (c *ConfigService) generateConfigCandidates(appName, env string) []string {
+	prefixes := []string{appName, "application"}
+	extensions := []string{".yaml", ".yml", ".json", ".properties"}
+
+	var files []string
+	for _, p := range prefixes {
+		files = append(files, fmt.Sprintf("%s/%s-%s", env, p, env))
 	}
 
-	var propertySources []dto.PropertySource
-
+	var candidates []string
 	for _, f := range files {
-		fullPath := filepath.Join(dir, f)
-		if _, err := os.Stat(fullPath); err == nil {
-			props, err := helper.ParseFile(fullPath)
-			if err != nil {
-				return nil, err
-			}
-			propertySources = append(propertySources, dto.PropertySource{
-				Name:   filepath.Join(filepath.Base(filepath.Dir(fullPath)), filepath.Base(fullPath)), // label/env/file
-				Source: props,
-			})
+		for _, ext := range extensions {
+			candidates = append(candidates, f+ext)
 		}
 	}
 
-	hash, _ := c.repo.GetCommitHash()
+	fmt.Println("candidates:", candidates)
 
-	return &dto.ConfigResponse{
-		Name:            app,
-		Profiles:        []string{env},
-		Label:           nullable(label),
-		Version:         hash,
-		PropertySources: propertySources,
-	}, nil
+	return candidates
+}
+
+func (c *ConfigService) findAndReadAllConfigs(refName string, candidates []string) ([]dto.PropertySource, error) {
+	var sources []dto.PropertySource
+
+	for _, name := range candidates {
+		filePath := filepath.ToSlash(filepath.Join(c.repo.Path, name))
+		log.Printf("Loading config from %s", filePath)
+		data, err := c.repo.GetFile(refName, filePath)
+		if err != nil {
+			log.Printf("ERROR %v", err)
+			continue
+		}
+
+		ext := filepath.Ext(name)
+		src, err := helper.ParseFile(data, ext)
+		if err != nil {
+			return nil, err
+		}
+
+		sources = append(sources, dto.PropertySource{
+			Name:   filePath,
+			Source: src,
+		})
+	}
+
+	if len(sources) == 0 {
+		return nil, fmt.Errorf("no config file found in %s (label: %s)", c.repo.Path, label)
+	}
+
+	return sources, nil
 }
