@@ -59,7 +59,7 @@
         <entry key="file://$PROJECT_DIR$/cmd/conflect/conflect.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758633210622" />
+              <option name="lastModified" value="1758641495893" />
             </ScannedPath>
           </value>
         </entry>
@@ -98,7 +98,7 @@
         <entry key="file://$PROJECT_DIR$/internal/delivery/http/handler.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758631132340" />
+              <option name="lastModified" value="1758641693259" />
               <option name="schema">
                 <list>
                   <option value="Server" />
@@ -111,6 +111,20 @@
           <value>
             <ScannedPath>
               <option name="lastModified" value="1758505318367" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/error/file.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758642380734" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/errors/file.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758642563003" />
             </ScannedPath>
           </value>
         </entry>
@@ -131,7 +145,7 @@
         <entry key="file://$PROJECT_DIR$/internal/repository/gitrepo.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758640786334" />
+              <option name="lastModified" value="1758641790875" />
               <option name="schema">
                 <list>
                   <option value="GitRepo" />
@@ -143,7 +157,7 @@
         <entry key="file://$PROJECT_DIR$/internal/service/config_service.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758640661917" />
+              <option name="lastModified" value="1758642603438" />
               <option name="schema">
                 <list>
                   <option value="ConfigService" />
@@ -155,7 +169,7 @@
         <entry key="file://$PROJECT_DIR$/internal/service/queue.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758501638142" />
+              <option name="lastModified" value="1758641670923" />
               <option name="schema">
                 <list>
                   <option value="Queue" />
@@ -167,7 +181,7 @@
         <entry key="file://$PROJECT_DIR$/internal/worker/worker.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758501668279" />
+              <option name="lastModified" value="1758641751940" />
             </ScannedPath>
           </value>
         </entry>

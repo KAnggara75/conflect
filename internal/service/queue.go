@@ -16,17 +16,17 @@
 package service
 
 type Queue struct {
-	ch chan struct{}
+	ch chan string
 }
 
 func NewQueue(size int) *Queue {
-	return &Queue{ch: make(chan struct{}, size)}
+	return &Queue{ch: make(chan string, size)}
 }
 
-func (q *Queue) Enqueue() {
-	q.ch <- struct{}{}
+func (q *Queue) Enqueue(branch string) {
+	q.ch <- branch
 }
 
-func (q *Queue) Dequeue() <-chan struct{} {
+func (q *Queue) Dequeue() <-chan string {
 	return q.ch
 }

@@ -23,6 +23,7 @@ import (
 
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http/dto"
+	"github.com/KAnggara75/conflect/internal/errors"
 	"github.com/KAnggara75/conflect/internal/helper"
 	"github.com/KAnggara75/conflect/internal/repository"
 )
@@ -41,9 +42,9 @@ func NewConfigService(cfg *config.Config, q *Queue) *ConfigService {
 	return &ConfigService{repo: repo, cfg: cfg}
 }
 
-func (c *ConfigService) UpdateRepo() error {
-	log.Println("Pulling latest config...")
-	return c.repo.Pull()
+func (c *ConfigService) UpdateRepo(branch string) error {
+	log.Printf("Pulling latest config for branch %s...", branch)
+	return c.repo.Pull(branch)
 }
 
 func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigResponse {
@@ -77,23 +78,22 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 }
 
 func (c *ConfigService) generateConfigCandidates(appName, env string) []string {
-	prefixes := []string{appName, "application"}
 	extensions := []string{".yaml", ".yml", ".json", ".properties"}
+	var candidates []string
 
-	var files []string
-	for _, p := range prefixes {
-		files = append(files, fmt.Sprintf("%s-%s", p, env))
+	for _, ext := range extensions {
+		candidates = append(candidates, fmt.Sprintf("%s-%s%s", appName, env, ext))
 	}
 
-	var candidates []string
-	for _, f := range files {
-		for _, ext := range extensions {
-			candidates = append(candidates, f+ext)
-		}
+	for _, ext := range extensions {
+		candidates = append(candidates, fmt.Sprintf("application-%s%s", env, ext))
+	}
+
+	for _, ext := range extensions {
+		candidates = append(candidates, "application"+ext)
 	}
 
 	fmt.Println("candidates:", candidates)
-
 	return candidates
 }
 
@@ -105,17 +105,22 @@ func (c *ConfigService) findAndReadAllConfigs(label, env string, candidates []st
 
 		data, err := os.ReadFile(filePath)
 		if err != nil {
-			fmt.Printf("skip file %s: %v\n", filePath, err)
-			continue
+			if skip, fileErr := errors.ShouldSkipFile(candidate, err); skip {
+				continue
+			} else {
+				return nil, fileErr
+			}
 		}
 
 		ext := filepath.Ext(filePath)
 		props, err := helper.ParseFile(data, ext)
 		if err != nil {
-			fmt.Printf("skip file %s: %v\n", filePath, err)
-			continue
+			if skip, fileErr := errors.ShouldSkipFile(candidate, err); skip {
+				continue
+			} else {
+				return nil, fileErr
+			}
 		}
-
 		sources = append(sources, dto.PropertySource{
 			Name:   candidate,
 			Source: props,

@@ -22,11 +22,11 @@ import (
 )
 
 func Start(q *service.Queue, s *service.ConfigService) {
-	for range q.Dequeue() {
-		if err := s.UpdateRepo(); err != nil {
-			log.Printf("repo update failed: %v", err)
+	for branch := range q.Dequeue() {
+		if err := s.UpdateRepo(branch); err != nil {
+			log.Printf("repo update failed for branch %s: %v", branch, err)
 		} else {
-			log.Println("repo updated successfully")
+			log.Printf("repo %s updated successfully", branch)
 		}
 	}
 }

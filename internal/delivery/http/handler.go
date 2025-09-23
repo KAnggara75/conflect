@@ -17,7 +17,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -43,14 +42,26 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
-	// Here you’d verify GitHub signature, omitted for brevity
-	s.queue.Enqueue()
-	w.WriteHeader(200)
-	_, err := w.Write([]byte("ok"))
-	if err != nil {
-		fmt.Println("Failed to write response:", err)
+	var payload struct {
+		Ref string `json:"ref"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, `{"error":"invalid json"}`, http.StatusBadRequest)
 		return
 	}
+
+	parts := strings.Split(payload.Ref, "/")
+	branch := parts[len(parts)-1]
+
+	s.queue.Enqueue(branch)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"status": "accepted",
+		"branch": branch,
+	})
 }
 
 func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {

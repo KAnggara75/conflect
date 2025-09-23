@@ -121,8 +121,10 @@ func (g *GitRepo) EnsureBranch(branch string) (string, error) {
 	return targetPath, nil
 }
 
-func (g *GitRepo) Pull() error {
-	cmd := exec.Command("git", "-C", g.Path, "pull", "--rebase")
+func (g *GitRepo) Pull(branch string) error {
+	branchPath := filepath.Join(g.Path, branch)
+
+	cmd := exec.Command("git", "-C", branchPath, "pull", "--rebase")
 	cmd.Env = append(os.Environ(),
 		"GIT_TERMINAL_PROMPT=0",
 	)
