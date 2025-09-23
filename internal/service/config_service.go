@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http/dto"
@@ -60,7 +61,11 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 
 	response.Label = label
 
-	candidates := c.generateConfigCandidates(appName, env)
+	candidates, err := c.generateConfigCandidates(appName, env, label)
+	if err != nil {
+		log.Println(err)
+		return response
+	}
 
 	data, err := c.findAndReadAllConfigs(label, env, candidates)
 	if err != nil {
@@ -77,24 +82,59 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 	return response
 }
 
-func (c *ConfigService) generateConfigCandidates(appName, env string) []string {
-	extensions := []string{".yaml", ".yml", ".json", ".properties"}
+func (c *ConfigService) generateConfigCandidates(appName, env, label string) ([]string, error) {
+	basePath := filepath.Join(c.repo.Path, label, env)
+
+	entries, err := os.ReadDir(basePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read dir %s: %w", basePath, err)
+	}
+
+	var (
+		appFiles         []string
+		applicationFiles []string
+		globalFiles      []string
+	)
+
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		ext := filepath.Ext(name)
+
+		switch ext {
+		case ".yaml", ".yml", ".json", ".properties":
+		default:
+			continue
+		}
+
+		// {appName}-{env}.*
+		if strings.HasPrefix(name, appName+"-"+env) {
+			appFiles = append(appFiles, name)
+			continue
+		}
+
+		// application-{env}.*
+		if strings.HasPrefix(name, "application-"+env) {
+			applicationFiles = append(applicationFiles, name)
+			continue
+		}
+
+		// application.*
+		if strings.HasPrefix(name, "application.") {
+			globalFiles = append(globalFiles, name)
+		}
+	}
+
 	var candidates []string
+	candidates = append(candidates, appFiles...)
+	candidates = append(candidates, applicationFiles...)
+	candidates = append(candidates, globalFiles...)
 
-	for _, ext := range extensions {
-		candidates = append(candidates, fmt.Sprintf("%s-%s%s", appName, env, ext))
-	}
+	log.Printf("Read File candidates: %v", candidates)
 
-	for _, ext := range extensions {
-		candidates = append(candidates, fmt.Sprintf("application-%s%s", env, ext))
-	}
-
-	for _, ext := range extensions {
-		candidates = append(candidates, "application"+ext)
-	}
-
-	fmt.Println("candidates:", candidates)
-	return candidates
+	return candidates, nil
 }
 
 func (c *ConfigService) findAndReadAllConfigs(label, env string, candidates []string) ([]dto.PropertySource, error) {
