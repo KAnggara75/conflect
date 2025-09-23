@@ -18,9 +18,12 @@ package service
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http/dto"
+	"github.com/KAnggara75/conflect/internal/helper"
 	"github.com/KAnggara75/conflect/internal/repository"
 )
 
@@ -56,14 +59,14 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 
 	response.Label = label
 
-	_ = c.generateConfigCandidates(appName, env)
+	candidates := c.generateConfigCandidates(appName, env)
 
-	//data, err := c.findAndReadAllConfigs(label, env, candidates)
-	//if err != nil {
-	//	log.Println(err)
-	//	return response
-	//}
-	//response.PropertySources = data
+	data, err := c.findAndReadAllConfigs(label, env, candidates)
+	if err != nil {
+		log.Println(err)
+		return response
+	}
+	response.PropertySources = data
 
 	hash, err := c.repo.GetCommitHashFromBranch(label)
 	if err == nil {
@@ -94,43 +97,29 @@ func (c *ConfigService) generateConfigCandidates(appName, env string) []string {
 	return candidates
 }
 
-func (c *ConfigService) findAndReadAllConfigs(refName string, candidates []string) ([]dto.PropertySource, error) {
+func (c *ConfigService) findAndReadAllConfigs(label, env string, candidates []string) ([]dto.PropertySource, error) {
 	var sources []dto.PropertySource
 
-	// resolve commit sekali
-	hash, err := c.repo.Repo.ResolveRevision(plumbing.Revision(refName))
-	if err != nil {
-		return nil, err
-	}
-	commit, err := c.repo.Repo.CommitObject(*hash)
-	if err != nil {
-		return nil, err
-	}
+	for _, candidate := range candidates {
+		filePath := filepath.Join(c.repo.Path, label, env, candidate)
 
-	for _, name := range candidates {
-		relPath := filepath.ToSlash(name)
-		log.Printf("Loading config from repo path: %s", relPath)
-
-		data, err := c.repo.GetFile(commit, relPath)
+		data, err := os.ReadFile(filePath)
 		if err != nil {
-			log.Printf("ERROR %v", err)
+			fmt.Printf("skip file %s: %v\n", filePath, err)
 			continue
 		}
 
-		ext := filepath.Ext(name)
-		src, err := helper.ParseFile(data, ext)
+		ext := filepath.Ext(filePath)
+		props, err := helper.ParseFile(data, ext)
 		if err != nil {
-			return nil, err
+			fmt.Printf("skip file %s: %v\n", filePath, err)
+			continue
 		}
 
 		sources = append(sources, dto.PropertySource{
-			Name:   relPath,
-			Source: src,
+			Name:   candidate,
+			Source: props,
 		})
-	}
-
-	if len(sources) == 0 {
-		return nil, fmt.Errorf("no config file found in %s (ref: %s)", c.repo.Path, refName)
 	}
 
 	return sources, nil

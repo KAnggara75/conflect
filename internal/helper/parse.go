@@ -44,7 +44,6 @@ func ParseFile(data []byte, ext string) (map[string]interface{}, error) {
 		flattenMap("", m, out)
 	case ".properties":
 		m := parseProperties(data)
-		// properties are usually flat keys already (like "a.b.c"), copy as-is
 		for k, v := range m {
 			out[k] = v
 		}
@@ -87,7 +86,6 @@ func flattenMap(prefix string, cur interface{}, out map[string]interface{}) {
 	}
 }
 
-// parseProperties parses key=value properties, tries to coerce to int/float/bool when sensible
 func parseProperties(data []byte) map[string]interface{} {
 	res := make(map[string]interface{})
 	s := bufio.NewScanner(bytes.NewReader(data))

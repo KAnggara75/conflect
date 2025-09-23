@@ -25,8 +25,6 @@ import (
 	"strings"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type GitRepo struct {
@@ -69,7 +67,7 @@ func (g *GitRepo) listRemoteBranches() ([]string, error) {
 		if len(parts) != 2 {
 			continue
 		}
-		ref := parts[1] // refs/heads/<branch>
+		ref := parts[1]
 		if strings.HasPrefix(ref, "refs/heads/") {
 			branch := strings.TrimPrefix(ref, "refs/heads/")
 			branches = append(branches, branch)
@@ -123,24 +121,6 @@ func (g *GitRepo) EnsureBranch(branch string) (string, error) {
 	return targetPath, nil
 }
 
-func (g *GitRepo) DefaultBranch() (string, error) {
-	rem, err := g.Repo.Remote("origin")
-	if err != nil {
-		return "", err
-	}
-	refs, err := rem.List(&git.ListOptions{})
-	if err != nil {
-		return "", err
-	}
-	for _, r := range refs {
-		if r.Type() == plumbing.SymbolicReference && r.Name().String() == "HEAD" {
-			return strings.TrimPrefix(r.Target().String(), "refs/heads/"), nil
-		}
-	}
-
-	return "main", nil
-}
-
 func (g *GitRepo) Pull() error {
 	cmd := exec.Command("git", "-C", g.Path, "pull", "--rebase")
 	cmd.Env = append(os.Environ(),
@@ -165,22 +145,4 @@ func (g *GitRepo) GetCommitHashFromBranch(branch string) (string, error) {
 	}
 
 	return strings.TrimSpace(out.String()), nil
-}
-
-func (g *GitRepo) GetFile(commit *object.Commit, filePath string) ([]byte, error) {
-	tree, err := commit.Tree()
-	if err != nil {
-		return nil, err
-	}
-
-	entry, err := tree.File(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	contents, err := entry.Contents()
-	if err != nil {
-		return nil, err
-	}
-	return []byte(contents), nil
 }
