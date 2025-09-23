@@ -131,7 +131,7 @@
         <entry key="file://$PROJECT_DIR$/internal/repository/gitrepo.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758634606773" />
+              <option name="lastModified" value="1758634977484" />
               <option name="schema">
                 <list>
                   <option value="GitRepo" />
@@ -143,7 +143,7 @@
         <entry key="file://$PROJECT_DIR$/internal/service/config_service.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758634882076" />
+              <option name="lastModified" value="1758635014732" />
               <option name="schema">
                 <list>
                   <option value="ConfigService" />

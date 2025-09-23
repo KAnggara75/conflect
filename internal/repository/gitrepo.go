@@ -82,18 +82,7 @@ func (g *GitRepo) Pull() error {
 	return cmd.Run()
 }
 
-func (g *GitRepo) GetCommitHash(label string) (string, error) {
-	var refName plumbing.ReferenceName
-	if label == "" {
-		def, err := g.DefaultBranch()
-		if err != nil {
-			return "", err
-		}
-		refName = plumbing.NewRemoteReferenceName("origin", def)
-	} else {
-		refName = plumbing.NewRemoteReferenceName("origin", label)
-	}
-
+func (g *GitRepo) GetCommitHash(refName plumbing.ReferenceName) (string, error) {
 	ref, err := g.repo.Reference(refName, true)
 	if err != nil {
 		return "", err

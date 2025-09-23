@@ -53,21 +53,21 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 		Profiles: []string{env},
 	}
 
-	var refName string
+	var refName plumbing.ReferenceName
 	if label == "" {
 		def, err := c.repo.DefaultBranch()
 		if err != nil {
 			log.Println(err)
 			return response
 		}
-		refName = plumbing.NewRemoteReferenceName("origin", def).String()
+		refName = plumbing.NewRemoteReferenceName("origin", def)
 	} else {
-		refName = plumbing.NewRemoteReferenceName("origin", label).String()
+		refName = plumbing.NewRemoteReferenceName("origin", label)
 	}
 
 	candidates := c.generateConfigCandidates(appName, env)
 
-	data, err := c.findAndReadAllConfigs(refName, candidates)
+	data, err := c.findAndReadAllConfigs(refName.String(), candidates)
 	if err != nil {
 		log.Println(err)
 		return response
@@ -128,7 +128,7 @@ func (c *ConfigService) findAndReadAllConfigs(refName string, candidates []strin
 	}
 
 	if len(sources) == 0 {
-		return nil, fmt.Errorf("no config file found in %s (label: %s)", c.repo.Path, label)
+		return nil, fmt.Errorf("no config file found in %s (refName: %s)", c.repo.Path, refName)
 	}
 
 	return sources, nil
