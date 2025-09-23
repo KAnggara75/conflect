@@ -18,6 +18,8 @@ package config
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/KAnggara75/conflect/internal/helper"
 )
 
 type Config struct {
@@ -30,11 +32,22 @@ type Config struct {
 func Load() *Config {
 	cwd, _ := os.Getwd()
 	defaultRepo := filepath.Join(cwd, "repo")
+	repoPathFile := getEnv("REPO_PATH_FILE", defaultRepo)
+	webhookSecretFile := getEnv("WEBHOOK_SECRET_FILE", "")
+
+	repoTokenFile := getEnv("TOKEN_FILE", "")
+	repoToken := getEnv("TOKEN", repoTokenFile)
+
+	repoUrlFile := getEnv("REPO_URL_FILE", "")
+
+	repoUrl := getEnv("REPO_URL", repoUrlFile)
+
+	url := helper.NormalizeRepoURL(repoUrl, repoToken)
 	return &Config{
 		Port:          getEnv("APP_PORT", "8080"),
-		RepoPath:      getEnv("REPO_PATH", defaultRepo),
-		RepoURL:       getEnv("REPO_URL", ""),
-		WebhookSecret: getEnv("WEBHOOK_SECRET", ""),
+		RepoPath:      getEnv("REPO_PATH", repoPathFile),
+		RepoURL:       url,
+		WebhookSecret: getEnv("WEBHOOK_SECRET", webhookSecretFile),
 	}
 }
 
