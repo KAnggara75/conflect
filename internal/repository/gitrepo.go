@@ -149,12 +149,22 @@ func (g *GitRepo) Pull() error {
 	return cmd.Run()
 }
 
-func (g *GitRepo) GetCommitHash(refName plumbing.ReferenceName) (string, error) {
-	ref, err := g.Repo.Reference(refName, true)
-	if err != nil {
-		return "", err
+func (g *GitRepo) GetCommitHashFromBranch(branch string) (string, error) {
+	branchPath := filepath.Join(g.Path, branch)
+	cmd := exec.Command("git", "rev-parse", branch)
+
+	cmd.Dir = branchPath
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("git rev-parse error for branch %s: %v (%s)", branchPath, err, stderr.String())
 	}
-	return ref.Hash().String(), nil
+
+	return strings.TrimSpace(out.String()), nil
 }
 
 func (g *GitRepo) GetFile(commit *object.Commit, filePath string) ([]byte, error) {
