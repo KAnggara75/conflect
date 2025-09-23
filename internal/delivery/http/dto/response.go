@@ -18,7 +18,7 @@ package dto
 type ConfigResponse struct {
 	Name            string           `json:"name"`
 	Profiles        []string         `json:"profiles"`
-	Label           *string          `json:"label,omitempty"`
+	Label           string           `json:"label,omitempty"`
 	Version         string           `json:"version"`
 	PropertySources []PropertySource `json:"propertySources"`
 }

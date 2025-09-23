@@ -62,25 +62,31 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appName := parts[0]
-	env := parts[1]
-	var label *string
-	if len(parts) > 2 {
-		tmp := parts[2]
-		label = &tmp
-	}
+	var propertySources []dto.PropertySource
 
 	// commit hash (version). If error, leave empty string.
 	version, _ := s.configService.GetCommitHash()
 
-	var propertySources []dto.PropertySource
+	appName := parts[0]
+	env := parts[1]
+	label := ""
+	if len(parts) > 2 {
+		label = parts[2]
+	}
 
 	prefixes := []string{appName, "application"}
 	extensionList := []string{".yaml", ".yml", ".json", ".properties"}
 
 	for _, prefix := range prefixes {
+		// try with label if exists
+		config, err := s.configService.LoadConfig(app, env, label)
+		if err != nil && label != "" {
+			// fallback: try without label
+			config, err = s.configService.LoadConfig(app, env, "")
+		}
+
 		filename := fmt.Sprintf("%s-%s", prefix, env)
-		if label != nil {
+		if label != "" {
 			filename = fmt.Sprintf("%s-%s", filename, *label)
 		}
 

@@ -85,7 +85,7 @@
         <entry key="file://$PROJECT_DIR$/internal/delivery/http/dto/response.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758505635775" />
+              <option name="lastModified" value="1758506202577" />
               <option name="schema">
                 <list>
                   <option value="ConfigResponse" />
@@ -98,7 +98,7 @@
         <entry key="file://$PROJECT_DIR$/internal/delivery/http/handler.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758505632082" />
+              <option name="lastModified" value="1758506300906" />
               <option name="schema">
                 <list>
                   <option value="Server" />
@@ -111,6 +111,13 @@
           <value>
             <ScannedPath>
               <option name="lastModified" value="1758505318367" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/helper/parse.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1758506479365" />
             </ScannedPath>
           </value>
         </entry>
@@ -129,7 +136,7 @@
         <entry key="file://$PROJECT_DIR$/internal/service/config_service.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758504392002" />
+              <option name="lastModified" value="1758506508923" />
               <option name="schema">
                 <list>
                   <option value="ConfigService" />

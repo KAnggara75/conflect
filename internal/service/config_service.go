@@ -16,11 +16,14 @@
 package service
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/KAnggara75/conflect/internal/config"
+	"github.com/KAnggara75/conflect/internal/delivery/http/dto"
+	"github.com/KAnggara75/conflect/internal/helper"
 	"github.com/KAnggara75/conflect/internal/repository"
 )
 
@@ -51,4 +54,54 @@ func (c *ConfigService) GetFile(env string, filename string) ([]byte, error) {
 
 func (c *ConfigService) GetCommitHash() (string, error) {
 	return c.repo.GetCommitHash()
+}
+
+func (c *ConfigService) LoadConfig(app, env, label string) (*ConfigResponse, error) {
+	basePath := c.repo.Path
+	var dir string
+	if label != "" {
+		dir = filepath.Join(basePath, label, env)
+	} else {
+		dir = filepath.Join(basePath, env)
+	}
+
+	// check dir exists
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return nil, fmt.Errorf("directory not found: %s", dir)
+	}
+
+	files := []string{
+		fmt.Sprintf("%s-%s.yaml", app, env),
+		fmt.Sprintf("application-%s.yaml", env),
+		fmt.Sprintf("%s-%s.json", app, env),
+		fmt.Sprintf("application-%s.json", env),
+		fmt.Sprintf("%s-%s.properties", app, env),
+		fmt.Sprintf("application-%s.properties", env),
+	}
+
+	var propertySources []dto.PropertySource
+
+	for _, f := range files {
+		fullPath := filepath.Join(dir, f)
+		if _, err := os.Stat(fullPath); err == nil {
+			props, err := helper.ParseFile(fullPath)
+			if err != nil {
+				return nil, err
+			}
+			propertySources = append(propertySources, dto.PropertySource{
+				Name:   filepath.Join(filepath.Base(filepath.Dir(fullPath)), filepath.Base(fullPath)), // label/env/file
+				Source: props,
+			})
+		}
+	}
+
+	hash, _ := c.repo.GetCommitHash()
+
+	return &dto.ConfigResponse{
+		Name:            app,
+		Profiles:        []string{env},
+		Label:           nullable(label),
+		Version:         hash,
+		PropertySources: propertySources,
+	}, nil
 }
