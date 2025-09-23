@@ -26,6 +26,7 @@ type Config struct {
 	Port          string
 	RepoPath      string
 	RepoURL       string
+	DefaultBranch string
 	WebhookSecret string
 }
 
@@ -47,6 +48,7 @@ func Load() *Config {
 		Port:          getEnv("APP_PORT", "8080"),
 		RepoPath:      getEnv("REPO_PATH", repoPathFile),
 		RepoURL:       url,
+		DefaultBranch: "main",
 		WebhookSecret: getEnv("WEBHOOK_SECRET", webhookSecretFile),
 	}
 }
