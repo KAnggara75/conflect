@@ -34,8 +34,8 @@ type ConfigService struct {
 
 func NewConfigService(cfg *config.Config, q *Queue) *ConfigService {
 	repo := repository.NewGitRepo(cfg.RepoPath, cfg.RepoURL)
-
-	if err := repo.EnsureCloned(); err != nil {
+	err := repo.InitAllBranches()
+	if err != nil {
 		log.Fatalf("failed to clone repo: %v", err)
 	}
 	return &ConfigService{repo: repo, cfg: cfg}
@@ -106,10 +106,21 @@ func (c *ConfigService) generateConfigCandidates(appName, env string) []string {
 func (c *ConfigService) findAndReadAllConfigs(refName string, candidates []string) ([]dto.PropertySource, error) {
 	var sources []dto.PropertySource
 
+	// resolve commit sekali
+	hash, err := c.repo.Repo.ResolveRevision(plumbing.Revision(refName))
+	if err != nil {
+		return nil, err
+	}
+	commit, err := c.repo.Repo.CommitObject(*hash)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, name := range candidates {
-		filePath := filepath.ToSlash(filepath.Join(c.repo.Path, name))
-		log.Printf("Loading config from %s", filePath)
-		data, err := c.repo.GetFile(refName, filePath)
+		relPath := filepath.ToSlash(name)
+		log.Printf("Loading config from repo path: %s", relPath)
+
+		data, err := c.repo.GetFile(commit, relPath)
 		if err != nil {
 			log.Printf("ERROR %v", err)
 			continue
@@ -122,13 +133,13 @@ func (c *ConfigService) findAndReadAllConfigs(refName string, candidates []strin
 		}
 
 		sources = append(sources, dto.PropertySource{
-			Name:   filePath,
+			Name:   relPath,
 			Source: src,
 		})
 	}
 
 	if len(sources) == 0 {
-		return nil, fmt.Errorf("no config file found in %s (refName: %s)", c.repo.Path, refName)
+		return nil, fmt.Errorf("no config file found in %s (ref: %s)", c.repo.Path, refName)
 	}
 
 	return sources, nil

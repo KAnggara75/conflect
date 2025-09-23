@@ -16,48 +16,115 @@
 package repository
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type GitRepo struct {
 	Path string
 	URL  string
-	repo *git.Repository
+	Repo *git.Repository
 }
 
 func NewGitRepo(path, url string) *GitRepo {
 	return &GitRepo{Path: path, URL: url}
 }
 
-func (g *GitRepo) EnsureCloned() error {
-	if _, err := os.Stat(g.Path); os.IsNotExist(err) {
-		fmt.Println("Cloning repo to", g.Path)
-		r, err := git.PlainClone(g.Path, false, &git.CloneOptions{
-			URL:      g.URL,
-			Progress: os.Stdout,
-		})
-		if err != nil {
-			return err
-		}
-		g.repo = r
-		return nil
-	}
-	r, err := git.PlainOpen(g.Path)
+func (g *GitRepo) InitAllBranches() error {
+	branches, err := g.listRemoteBranches()
 	if err != nil {
 		return err
 	}
-	g.repo = r
+
+	for _, branch := range branches {
+		if _, err := g.EnsureBranch(branch); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
+func (g *GitRepo) listRemoteBranches() ([]string, error) {
+	cmd := exec.Command("git", "ls-remote", "--heads", g.URL)
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list remote branches: %w", err)
+	}
+
+	var branches []string
+	scanner := bufio.NewScanner(bytes.NewReader(out))
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Split(line, "\t")
+		if len(parts) != 2 {
+			continue
+		}
+		ref := parts[1] // refs/heads/<branch>
+		if strings.HasPrefix(ref, "refs/heads/") {
+			branch := strings.TrimPrefix(ref, "refs/heads/")
+			branches = append(branches, branch)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return branches, nil
+}
+
+func (g *GitRepo) EnsureBranch(branch string) (string, error) {
+	path := "origin"
+	if branch != "" {
+		path = branch
+	}
+
+	targetPath := filepath.Join(g.Path, path)
+	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
+		var cmd *exec.Cmd
+
+		if branch != "" {
+			fmt.Printf("Cloning branch %s into %s\n", branch, targetPath)
+			cmd = exec.Command(
+				"git", "clone",
+				"--branch", branch,
+				"--single-branch",
+				"--depth=1",
+				g.URL,
+				targetPath,
+			)
+		} else {
+			fmt.Printf("Cloning default branch into %s\n", targetPath)
+			cmd = exec.Command(
+				"git", "clone",
+				"--single-branch",
+				"--depth=1",
+				g.URL,
+				targetPath,
+			)
+
+		}
+
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			return "", fmt.Errorf("failed to clone branch %s: %w", branch, err)
+		}
+	}
+	return targetPath, nil
+}
+
 func (g *GitRepo) DefaultBranch() (string, error) {
-	rem, err := g.repo.Remote("origin")
+	rem, err := g.Repo.Remote("origin")
 	if err != nil {
 		return "", err
 	}
@@ -83,31 +150,19 @@ func (g *GitRepo) Pull() error {
 }
 
 func (g *GitRepo) GetCommitHash(refName plumbing.ReferenceName) (string, error) {
-	ref, err := g.repo.Reference(refName, true)
+	ref, err := g.Repo.Reference(refName, true)
 	if err != nil {
 		return "", err
 	}
 	return ref.Hash().String(), nil
 }
 
-func (g *GitRepo) GetFile(refName, filePath string) ([]byte, error) {
-
-	commit, err := g.repo.ResolveRevision(plumbing.Revision(refName))
+func (g *GitRepo) GetFile(commit *object.Commit, filePath string) ([]byte, error) {
+	tree, err := commit.Tree()
 	if err != nil {
 		return nil, err
 	}
 
-	// get tree
-	commitObj, err := g.repo.CommitObject(*commit)
-	if err != nil {
-		return nil, err
-	}
-	tree, err := commitObj.Tree()
-	if err != nil {
-		return nil, err
-	}
-
-	// find file
 	entry, err := tree.File(filePath)
 	if err != nil {
 		return nil, err
