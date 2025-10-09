@@ -33,24 +33,40 @@ type Config struct {
 func Load() *Config {
 	cwd, _ := os.Getwd()
 	defaultRepo := filepath.Join(cwd, "tmp/repo")
-	repoPathFile := getEnv("REPO_PATH_FILE", defaultRepo)
-	webhookSecretFile := getEnv("WEBHOOK_SECRET_FILE", "")
 
-	repoTokenFile := getEnv("TOKEN_FILE", "")
-	repoToken := getEnv("TOKEN", repoTokenFile)
-
-	repoUrlFile := getEnv("REPO_URL_FILE", "")
-
-	repoUrl := getEnv("REPO_URL", repoUrlFile)
-
-	url := helper.NormalizeRepoURL(repoUrl, repoToken)
 	return &Config{
 		Port:          getEnv("APP_PORT", "8080"),
-		RepoPath:      getEnv("REPO_PATH", repoPathFile),
-		RepoURL:       url,
-		DefaultBranch: "main",
-		WebhookSecret: getEnv("WEBHOOK_SECRET", webhookSecretFile),
+		RepoPath:      getEnv("REPO_PATH", defaultRepo),
+		RepoURL:       buildRepoURL(),
+		DefaultBranch: getEnv("DEFAULT_BRANCH", "main"),
+		WebhookSecret: readValue("WEBHOOK_SECRET", "WEBHOOK_SECRET_FILE", ""),
 	}
+}
+
+func buildRepoURL() string {
+	repoURL := readValue("REPO_URL", "REPO_URL_FILE", "")
+	token := readValue("TOKEN", "TOKEN_FILE", "")
+
+	if repoURL == "" {
+		return ""
+	}
+	return helper.NormalizeRepoURL(repoURL, token)
+}
+
+func readValue(envKey, fileKey, defaultValue string) string {
+	val := os.Getenv(envKey)
+	if val != "" {
+		return val
+	}
+	filePath := os.Getenv(fileKey)
+	if filePath == "" {
+		return defaultValue
+	}
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return defaultValue
+	}
+	return string(data)
 }
 
 func getEnv(key, fallback string) string {

@@ -63,17 +63,10 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/cmd/server/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1758501568807" />
-            </ScannedPath>
-          </value>
-        </entry>
         <entry key="file://$PROJECT_DIR$/internal/config/config.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758639668082" />
+              <option name="lastModified" value="1760048309911" />
               <option name="schema">
                 <list>
                   <option value="Config" />
@@ -104,20 +97,6 @@
                   <option value="Server" />
                 </list>
               </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/internal/delivery/http/parse.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1758505318367" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/internal/error/file.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1758642380734" />
             </ScannedPath>
           </value>
         </entry>
@@ -198,6 +177,6 @@
         <entry key="server" value="Server" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1758500772880" />
+    <option name="lastTimeChecked" value="1760018820079" />
   </component>
 </project>
