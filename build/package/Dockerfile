@@ -1,11 +1,13 @@
+# Stage 1: Builder
 FROM golang:1.25-alpine AS builder
-WORKDIR /app
-COPY ../.. .
-RUN go build -o conflect ./cmd/app
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /bin/conflect ./cmd/conflect
 
-FROM alpine:3.20
-WORKDIR /app
-COPY --from=builder /app/conflect .
-# mount secrets/config via file jika diperlukan
+# Stage 2: Runtime
+FROM scratch
+COPY --from=builder /bin/conflect /conflect
 ENV APP_PORT=8080
-CMD ["./conflect"]
+ENTRYPOINT ["/conflect"]
