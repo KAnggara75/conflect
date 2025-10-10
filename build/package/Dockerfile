@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM golang:1.23-alpine AS builder
+FROM golang:alpine3.22 AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
@@ -7,7 +7,7 @@ COPY . .
 RUN go build -o conflect ./cmd/conflect
 
 # Stage 2: Runtime
-FROM alpine:3.20
+FROM alpine:3.22
 
 # Tambahkan user non-root
 RUN adduser -D appuser
