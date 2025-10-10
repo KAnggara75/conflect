@@ -1,13 +1,29 @@
-# Stage 1: Builder
-FROM golang:1.25-alpine AS builder
-WORKDIR /src
+# Stage 1: Build
+FROM golang:1.23-alpine AS builder
+WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /bin/conflect ./cmd/conflect
+RUN go build -o conflect ./cmd/conflect
 
 # Stage 2: Runtime
-FROM scratch
-COPY --from=builder /bin/conflect /conflect
+FROM alpine:3.20
+
+# Tambahkan user non-root
+RUN adduser -D appuser
+
+WORKDIR /app
+COPY --from=builder /app/conflect .
+
+USER appuser
+
 ENV APP_PORT=8080
-ENTRYPOINT ["/conflect"]
+EXPOSE 8080
+
+# Label untuk provenance & metadata
+LABEL org.opencontainers.image.title="Conflect" \
+      org.opencontainers.image.description="Spring Cloud Config alternative in Go" \
+      org.opencontainers.image.source="https://github.com/KAnggara75/conflect" \
+      org.opencontainers.image.licenses="Apache-2.0"
+
+ENTRYPOINT ["./conflect"]
