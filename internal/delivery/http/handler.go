@@ -36,9 +36,24 @@ func NewServer(cfg *config.Config, q *service.Queue, cs *service.ConfigService) 
 
 func (s *Server) Start() error {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", s.health)
 	mux.HandleFunc("/webhook", s.handleWebhook)
 	mux.HandleFunc("/", s.handleConfig)
 	return http.ListenAndServe(":"+s.cfg.Port, mux)
+}
+
+func (s *Server) health(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	resp := map[string]interface{}{
+		"status": "ok",
+		"code":   http.StatusOK,
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
