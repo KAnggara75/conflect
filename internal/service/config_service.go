@@ -51,8 +51,9 @@ func (c *ConfigService) UpdateRepo(branch string) error {
 func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigResponse {
 
 	response := &dto.ConfigResponse{
-		Name:     appName,
-		Profiles: []string{env},
+		Name:            appName,
+		Profiles:        []string{env},
+		PropertySources: []dto.PropertySource{}, // inisialisasi slice kosong
 	}
 
 	if label == "" {
