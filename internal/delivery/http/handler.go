@@ -25,22 +25,19 @@ import (
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http/middleware"
 	"github.com/KAnggara75/conflect/internal/service"
-	"github.com/KAnggara75/conflect/internal/util"
 )
 
 type Server struct {
 	cfg           *config.Config
 	queue         *service.Queue
 	configService *service.ConfigService
-	rateLimiter   *util.RateLimiter
 }
 
-func NewServer(cfg *config.Config, q *service.Queue, cs *service.ConfigService, rl *util.RateLimiter) *Server {
+func NewServer(cfg *config.Config, q *service.Queue, cs *service.ConfigService) *Server {
 	return &Server{
 		cfg:           cfg,
 		queue:         q,
 		configService: cs,
-		rateLimiter:   rl,
 	}
 }
 
@@ -60,7 +57,7 @@ func (s *Server) Start() error {
 	protectedHandler := middleware.Chain(
 		protectedMux,
 		middleware.Logging,
-		middleware.RateLimitMiddleware(s.cfg.Limit, 5*time.Second),
+		middleware.RateLimitMiddleware(s.cfg.Limit, time.Minute),
 		middleware.AuthMiddleware(authCfg),
 	)
 
