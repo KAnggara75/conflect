@@ -46,12 +46,12 @@ func Load() *Config {
 		RepoPath:      getEnv("REPO_PATH", defaultRepo),
 		RepoURL:       buildRepoURL(),
 		DefaultBranch: getEnv("DEFAULT_BRANCH", "main"),
-		Token:         readValue("TOKEN_SECRET", "TOKEN_SECRET_FILE", ""),
+		Token:         readValue("APP_AUTH_SECRET", "APP_AUTH_SECRET_FILE", ""),
 	}
 }
 
 func buildRepoURL() string {
-	token := readValue("TOKEN", "TOKEN_FILE", "")
+	token := readValue("GIT_AUTH_TOKEN", "GIT_AUTH_TOKEN_FILE", "")
 	repoURL := readValue("REPO_URL", "REPO_URL_FILE", "")
 	if repoURL == "" {
 		return ""
