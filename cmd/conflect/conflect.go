@@ -17,10 +17,12 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http"
 	"github.com/KAnggara75/conflect/internal/service"
+	"github.com/KAnggara75/conflect/internal/util"
 	"github.com/KAnggara75/conflect/internal/worker"
 )
 
@@ -34,7 +36,9 @@ func main() {
 	// start worker
 	go worker.Start(queue, configService)
 
+	limiter := util.NewRateLimiter(20, time.Minute) // contoh 20 req per menit per IP
+
 	// start HTTP server
-	server := http.NewServer(cfg, queue, configService)
+	server := http.NewServer(cfg, queue, configService, limiter)
 	log.Fatal(server.Start())
 }

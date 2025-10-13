@@ -17,32 +17,69 @@ package http
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/KAnggara75/conflect/internal/config"
+	"github.com/KAnggara75/conflect/internal/delivery/http/middleware"
 	"github.com/KAnggara75/conflect/internal/service"
+	"github.com/KAnggara75/conflect/internal/util"
 )
 
 type Server struct {
 	cfg           *config.Config
 	queue         *service.Queue
 	configService *service.ConfigService
+	rateLimiter   *util.RateLimiter
 }
 
-func NewServer(cfg *config.Config, q *service.Queue, cs *service.ConfigService) *Server {
-	return &Server{cfg: cfg, queue: q, configService: cs}
+func NewServer(cfg *config.Config, q *service.Queue, cs *service.ConfigService, rl *util.RateLimiter) *Server {
+	return &Server{
+		cfg:           cfg,
+		queue:         q,
+		configService: cs,
+		rateLimiter:   rl,
+	}
 }
 
 func (s *Server) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.health)
-	mux.HandleFunc("/webhook", s.handleWebhook)
-	mux.HandleFunc("/", s.handleConfig)
-	return http.ListenAndServe(":"+s.cfg.Port, mux)
+
+	// Route yang butuh middleware
+	protectedMux := http.NewServeMux()
+	protectedMux.HandleFunc("/webhook", s.handleWebhook)
+	protectedMux.HandleFunc("/", s.handleConfig)
+
+	// Wrap middleware
+	authCfg := middleware.AuthConfig{Token: s.cfg.Token}
+
+	// Chain untuk endpoint yang dilindungi
+	protectedHandler := middleware.Chain(
+		protectedMux,
+		middleware.Logging,
+		middleware.RateLimitMiddleware(s.cfg.Limit, 5*time.Second),
+		middleware.AuthMiddleware(authCfg),
+	)
+
+	// Gabungkan kedua mux
+	rootMux := http.NewServeMux()
+	rootMux.Handle("/health", mux)
+	rootMux.Handle("/", protectedHandler)
+
+	srv := &http.Server{
+		Addr:    ":" + s.cfg.Port,
+		Handler: rootMux,
+	}
+
+	log.Printf("🚀 Conflect server running at :%s", s.cfg.Port)
+	return srv.ListenAndServe()
+
 }
 
-func (s *Server) health(w http.ResponseWriter, r *http.Request) {
+func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 

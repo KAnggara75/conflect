@@ -8,7 +8,7 @@
  *
  * See <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
- * @author KAnggara75 on Mon 22/09/25 07.39
+ * @author KAnggara75
  * @project conflect config
  * https://github.com/KAnggara75/conflect/tree/main/internal/config
  */
@@ -18,6 +18,8 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/KAnggara75/conflect/internal/helper"
 )
@@ -27,26 +29,30 @@ type Config struct {
 	RepoPath      string
 	RepoURL       string
 	DefaultBranch string
-	WebhookSecret string
+	Limit         int
+	Token         string
 }
 
 func Load() *Config {
-	cwd, _ := os.Getwd()
+	cwd, err := os.Getwd()
+	if err != nil {
+		cwd = "."
+	}
 	defaultRepo := filepath.Join(cwd, "tmp/repo")
 
 	return &Config{
+		Limit:         getEnvInt("RATE_LIMIT", 10), // default 10 requests
 		Port:          getEnv("APP_PORT", "8080"),
 		RepoPath:      getEnv("REPO_PATH", defaultRepo),
 		RepoURL:       buildRepoURL(),
 		DefaultBranch: getEnv("DEFAULT_BRANCH", "main"),
-		WebhookSecret: readValue("WEBHOOK_SECRET", "WEBHOOK_SECRET_FILE", ""),
+		Token:         readValue("TOKEN_SECRET", "TOKEN_SECRET_FILE", ""),
 	}
 }
 
 func buildRepoURL() string {
-	repoURL := readValue("REPO_URL", "REPO_URL_FILE", "")
 	token := readValue("TOKEN", "TOKEN_FILE", "")
-
+	repoURL := readValue("REPO_URL", "REPO_URL_FILE", "")
 	if repoURL == "" {
 		return ""
 	}
@@ -54,19 +60,16 @@ func buildRepoURL() string {
 }
 
 func readValue(envKey, fileKey, defaultValue string) string {
-	val := os.Getenv(envKey)
-	if val != "" {
-		return val
+	if val := os.Getenv(envKey); val != "" {
+		return strings.TrimSpace(val)
 	}
-	filePath := os.Getenv(fileKey)
-	if filePath == "" {
-		return defaultValue
+	if filePath := os.Getenv(fileKey); filePath != "" {
+		data, err := os.ReadFile(filePath)
+		if err == nil {
+			return strings.TrimSpace(string(data))
+		}
 	}
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return defaultValue
-	}
-	return string(data)
+	return defaultValue
 }
 
 func getEnv(key, fallback string) string {
@@ -74,4 +77,16 @@ func getEnv(key, fallback string) string {
 		return val
 	}
 	return fallback
+}
+
+func getEnvInt(key string, fallback int) int {
+	val := os.Getenv(key)
+	if val == "" {
+		return fallback
+	}
+	i, err := strconv.Atoi(val)
+	if err != nil {
+		return fallback
+	}
+	return i
 }
