@@ -16,6 +16,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net"
 	"net/http"
 	"time"
@@ -30,7 +31,13 @@ func RateLimitMiddleware(limit int, window time.Duration) Middleware {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 			if !rl.IsAllow(ip) {
-				http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusTooManyRequests)
+
+				resp := map[string]string{
+					"error": "Too Many Requests",
+				}
+				_ = json.NewEncoder(w).Encode(resp)
 				return
 			}
 			next.ServeHTTP(w, r)
