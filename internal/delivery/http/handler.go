@@ -133,6 +133,13 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	resp := s.configService.LoadConfig(appName, env, label)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+
+	// kalau tidak ada property sources, return 404
+	if len(resp.PropertySources) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		resp.Error = "config for " + appName + " with env " + env + " found"
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
 	_ = json.NewEncoder(w).Encode(resp)
 }

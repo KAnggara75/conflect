@@ -21,6 +21,7 @@ type ConfigResponse struct {
 	Label           string           `json:"label,omitempty"`
 	Version         string           `json:"version,omitempty"`
 	PropertySources []PropertySource `json:"propertySources"`
+	Error           string           `json:"error,omitempty"`
 }
 
 type PropertySource struct {
