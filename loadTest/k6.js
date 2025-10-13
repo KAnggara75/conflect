@@ -11,7 +11,7 @@ export const options = {
 const AUTH_TOKEN = 'Bearer iniRahasiaWebhook';
 
 // daftar environment yang mungkin
-const ENVS = ['dev', 'prd', 'aws'];
+const ENVS = ['dev', 'prd'];
 
 // Endpoint dasar
 const BASE_URL = 'http://localhost:8080/pakaiwa';
@@ -19,7 +19,8 @@ const BASE_URL = 'http://localhost:8080/pakaiwa';
 export default function () {
     // Pilih environment acak: dev atau prd
     const env = ENVS[Math.floor(Math.random() * ENVS.length)];
-    const url = `${BASE_URL}/${env}`;
+    const label = Math.random() < 0.5 ? '/aws' : '';
+    const url = `${BASE_URL}/${env}${label}`;
 
     // Set header authorization
     const headers = {
