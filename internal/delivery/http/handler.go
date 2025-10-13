@@ -79,7 +79,8 @@ func (s *Server) Start() error {
 
 }
 
-func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) health(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
@@ -91,6 +92,7 @@ func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	log.Printf("[%s-HEALTH] %s %s in %v", r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
 }
 
 func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
