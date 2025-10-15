@@ -16,6 +16,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 )
@@ -29,13 +30,25 @@ func AuthMiddleware(cfg AuthConfig) Middleware {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			auth := r.Header.Get("Authorization")
 			if !strings.HasPrefix(auth, "Bearer ") {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+
+				resp := map[string]string{
+					"error": "Unauthorized",
+				}
+				_ = json.NewEncoder(w).Encode(resp)
 				return
 			}
 
 			token := strings.TrimPrefix(auth, "Bearer ")
 			if token != cfg.Token {
-				http.Error(w, "Invalid token", http.StatusUnauthorized)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+
+				resp := map[string]string{
+					"error": "Invalid token",
+				}
+				_ = json.NewEncoder(w).Encode(resp)
 				return
 			}
 
