@@ -3,6 +3,14 @@
   <component name="GoORMHelperCache">
     <option name="schemaMapping">
       <map>
+        <entry key="AuthConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/delivery/http/middleware/auth.go" />
+              <option value="file://$PROJECT_DIR$/internal/delivery/http/middleware/signature.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Config">
           <value>
             <set>
@@ -45,6 +53,13 @@
             </set>
           </value>
         </entry>
+        <entry key="RateLimiter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/util/ratelimiter.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Server">
           <value>
             <set>
@@ -59,14 +74,14 @@
         <entry key="file://$PROJECT_DIR$/cmd/conflect/conflect.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758641495893" />
+              <option name="lastModified" value="1760346696463" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/internal/config/config.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1760048309911" />
+              <option name="lastModified" value="1760336146886" />
               <option name="schema">
                 <list>
                   <option value="Config" />
@@ -78,7 +93,7 @@
         <entry key="file://$PROJECT_DIR$/internal/delivery/http/dto/response.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758631160533" />
+              <option name="lastModified" value="1760324062404" />
               <option name="schema">
                 <list>
                   <option value="ConfigResponse" />
@@ -91,7 +106,7 @@
         <entry key="file://$PROJECT_DIR$/internal/delivery/http/handler.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1760286091324" />
+              <option name="lastModified" value="1761842965175" />
               <option name="schema">
                 <list>
                   <option value="Server" />
@@ -100,10 +115,57 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/middleware/auth.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1761843161815" />
+              <option name="schema">
+                <list>
+                  <option value="AuthConfig" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/middleware/chain.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1760319970395" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/middleware/logger.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1760319948283" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/middleware/ratelimit.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1760337728035" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/delivery/http/middleware/signature.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1761843190435" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/internal/errors/file.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758642703132" />
+              <option name="lastModified" value="1760323467595" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/errors/http.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1760317615477" />
             </ScannedPath>
           </value>
         </entry>
@@ -136,7 +198,7 @@
         <entry key="file://$PROJECT_DIR$/internal/service/config_service.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1758643120978" />
+              <option name="lastModified" value="1760328376690" />
               <option name="schema">
                 <list>
                   <option value="ConfigService" />
@@ -157,6 +219,18 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/internal/util/ratelimiter.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1760710483526" />
+              <option name="schema">
+                <list>
+                  <option value="RateLimiter" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/internal/worker/worker.go">
           <value>
             <ScannedPath>
@@ -168,15 +242,17 @@
     </option>
     <option name="tableStructMapping">
       <map>
+        <entry key="auth_config" value="AuthConfig" />
         <entry key="config" value="Config" />
         <entry key="config_response" value="ConfigResponse" />
         <entry key="config_service" value="ConfigService" />
         <entry key="git_repo" value="GitRepo" />
         <entry key="property_source" value="PropertySource" />
         <entry key="queue" value="Queue" />
+        <entry key="rate_limiter" value="RateLimiter" />
         <entry key="server" value="Server" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1760282640595" />
+    <option name="lastTimeChecked" value="1761841606720" />
   </component>
 </project>

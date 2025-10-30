@@ -45,13 +45,23 @@ func (s *Server) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.health)
 
-	// Route yang butuh middleware
-	protectedMux := http.NewServeMux()
-	protectedMux.HandleFunc("/webhook", s.handleWebhook)
-	protectedMux.HandleFunc("/", s.handleConfig)
-
 	// Wrap middleware
 	authCfg := middleware.AuthConfig{Token: s.cfg.Token}
+
+	// Route yang butuh middleware
+	webhookMux := http.NewServeMux()
+	webhookMux.HandleFunc("/webhook", s.handleWebhook)
+
+	// Chain untuk endpoint yang dilindungi
+	webhookHandler := middleware.Chain(
+		webhookMux,
+		middleware.Logging,
+		middleware.RateLimitMiddleware(s.cfg.Limit, time.Minute),
+		middleware.VerifySignature(authCfg),
+	)
+
+	protectedMux := http.NewServeMux()
+	protectedMux.HandleFunc("/", s.handleConfig)
 
 	// Chain untuk endpoint yang dilindungi
 	protectedHandler := middleware.Chain(
@@ -64,6 +74,7 @@ func (s *Server) Start() error {
 	// Gabungkan kedua mux
 	rootMux := http.NewServeMux()
 	rootMux.Handle("/health", mux)
+	rootMux.Handle("/webhook", webhookHandler)
 	rootMux.Handle("/", protectedHandler)
 
 	srv := &http.Server{

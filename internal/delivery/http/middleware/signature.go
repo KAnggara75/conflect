@@ -8,7 +8,7 @@
  *
  * See <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
- * @author KAnggara75 on Mon 13/10/25 08.33
+ * @author KAnggara75 on Thu 30/10/25 23.33
  * @project conflect middleware
  * https://github.com/PakaiWA/PakaiWA/tree/main/internal/delivery/http/middleware
  */
@@ -16,44 +16,54 @@
 package middleware
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"io"
 	"net/http"
-	"strings"
 )
 
-type AuthConfig struct {
-	Token string
-}
-
-func AuthMiddleware(cfg AuthConfig) Middleware {
+func VerifySignature(cfg AuthConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			auth := r.Header.Get("Authorization")
-			if !strings.HasPrefix(auth, "Bearer ") {
+			const prefix = "sha256="
+			signatureHeader := r.Header.Get("X-Hub-Signature-256")
+
+			payload, err := io.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, "failed to read body", http.StatusInternalServerError)
+				return
+			}
+
+			resp := map[string]string{
+				"error": "Unauthorized",
+				"msg":   "Failed to Verify Signature",
+			}
+
+			if len(signatureHeader) < len(prefix) || signatureHeader[:len(prefix)] != prefix {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
 
-				resp := map[string]string{
-					"error": "Unauthorized",
-					"msg":   "Missing or invalid Authorization header",
-				}
 				_ = json.NewEncoder(w).Encode(resp)
 				return
 			}
 
-			token := strings.TrimPrefix(auth, "Bearer ")
-			if token != cfg.Token {
+			signature := signatureHeader[len(prefix):]
+			mac := hmac.New(sha256.New, []byte(cfg.Token))
+			mac.Write(payload)
+			expectedMAC := mac.Sum(nil)
+			expectedSig := hex.EncodeToString(expectedMAC)
+
+			if hmac.Equal([]byte(signature), []byte(expectedSig)) {
+				next.ServeHTTP(w, r)
+			} else {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
-
-				resp := map[string]string{
-					"error": "Invalid token",
-				}
 				_ = json.NewEncoder(w).Encode(resp)
 				return
 			}
 
-			next.ServeHTTP(w, r)
 		})
 	}
 }
