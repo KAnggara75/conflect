@@ -25,7 +25,30 @@ import (
 	"github.com/KAnggara75/conflect/internal/config"
 	"github.com/KAnggara75/conflect/internal/delivery/http/middleware"
 	"github.com/KAnggara75/conflect/internal/service"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+var (
+	requestsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "http_requests_total",
+			Help: "Total HTTP requests processed.",
+		},
+		[]string{"method", "path", "status"},
+	)
+	verifyFailures = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "webhook_verification_failures_total",
+			Help: "Number of failed webhook signature verifications.",
+		},
+	)
+)
+
+func init() {
+	prometheus.MustRegister(requestsTotal)
+	prometheus.MustRegister(verifyFailures)
+}
 
 type Server struct {
 	cfg           *config.Config
@@ -74,6 +97,7 @@ func (s *Server) Start() error {
 	// Gabungkan kedua mux
 	rootMux := http.NewServeMux()
 	rootMux.Handle("/health", mux)
+	rootMux.Handle("/metrics", promhttp.Handler())
 	rootMux.Handle("/webhook", webhookHandler)
 	rootMux.Handle("/", protectedHandler)
 
