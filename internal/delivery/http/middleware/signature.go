@@ -16,12 +16,15 @@
 package middleware
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
+	"strings"
 )
 
 func VerifySignature(cfg AuthConfig) Middleware {
@@ -30,40 +33,45 @@ func VerifySignature(cfg AuthConfig) Middleware {
 			const prefix = "sha256="
 			signatureHeader := r.Header.Get("X-Hub-Signature-256")
 
-			payload, err := io.ReadAll(r.Body)
+			// Baca body dan simpan salinannya agar bisa dipakai ulang
+			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				http.Error(w, "failed to read body", http.StatusInternalServerError)
 				return
 			}
+			r.Body = io.NopCloser(bytes.NewReader(body))
 
-			resp := map[string]string{
-				"error": "Unauthorized",
-				"msg":   "Failed to Verify Signature",
-			}
-
-			if len(signatureHeader) < len(prefix) || signatureHeader[:len(prefix)] != prefix {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusUnauthorized)
-
-				_ = json.NewEncoder(w).Encode(resp)
+			// Validasi header
+			if !strings.HasPrefix(signatureHeader, prefix) {
+				writeUnauthorized(w, "Failed to Verify signatureHeader")
 				return
 			}
 
-			signature := signatureHeader[len(prefix):]
+			// Hitung ulang HMAC
 			mac := hmac.New(sha256.New, []byte(cfg.Token))
-			mac.Write(payload)
-			expectedMAC := mac.Sum(nil)
-			expectedSig := hex.EncodeToString(expectedMAC)
+			mac.Write(body)
+			expected := hex.EncodeToString(mac.Sum(nil))
+			actual := signatureHeader[len(prefix):]
 
-			if hmac.Equal([]byte(signature), []byte(expectedSig)) {
-				next.ServeHTTP(w, r)
-			} else {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusUnauthorized)
-				_ = json.NewEncoder(w).Encode(resp)
+			log.Println(expected)
+			log.Println(actual)
+
+			// Timing-safe compare
+			if !hmac.Equal([]byte(expected), []byte(actual)) {
+				writeUnauthorized(w, "Failed to Verify Signature")
 				return
 			}
 
+			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func writeUnauthorized(w http.ResponseWriter, msg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusUnauthorized)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error": "Unauthorized",
+		"msg":   msg,
+	})
 }
