@@ -23,7 +23,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -x -ldflags="-s -w" -o confle
 FROM alpine:3.22
 
 # Install git dan CA certificates (wajib untuk HTTPS)
-# RUN apk add --no-cache git ca-certificates openssh-client curl && update-ca-certificates
+RUN apk add --no-cache git ca-certificates openssh-client curl && update-ca-certificates
 
 # Tambahkan user non-root
 RUN adduser -D -u 1001 appuser
