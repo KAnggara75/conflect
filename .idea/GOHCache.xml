@@ -7,7 +7,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/internal/delivery/http/middleware/auth.go" />
-              <option value="file://$PROJECT_DIR$/internal/delivery/http/middleware/signature.go" />
             </set>
           </value>
         </entry>
@@ -74,7 +73,7 @@
         <entry key="file://$PROJECT_DIR$/cmd/conflect/conflect.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1760346696463" />
+              <option name="lastModified" value="1762438705798" />
             </ScannedPath>
           </value>
         </entry>
@@ -106,7 +105,7 @@
         <entry key="file://$PROJECT_DIR$/internal/delivery/http/handler.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1761844614125" />
+              <option name="lastModified" value="1761844878351" />
               <option name="schema">
                 <list>
                   <option value="Server" />
@@ -151,7 +150,7 @@
         <entry key="file://$PROJECT_DIR$/internal/delivery/http/middleware/signature.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1761843430084" />
+              <option name="lastModified" value="1761843727796" />
             </ScannedPath>
           </value>
         </entry>
@@ -198,7 +197,7 @@
         <entry key="file://$PROJECT_DIR$/internal/service/config_service.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1760328376690" />
+              <option name="lastModified" value="1762438702506" />
               <option name="schema">
                 <list>
                   <option value="ConfigService" />
@@ -253,6 +252,6 @@
         <entry key="server" value="Server" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1761841606720" />
+    <option name="lastTimeChecked" value="1762438534586" />
   </component>
 </project>

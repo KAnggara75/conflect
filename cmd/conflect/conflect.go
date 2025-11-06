@@ -29,7 +29,7 @@ func main() {
 
 	// queue and service layer
 	queue := service.NewQueue(100)
-	configService := service.NewConfigService(cfg, queue)
+	configService := service.NewConfigService(cfg)
 
 	// start worker
 	go worker.Start(queue, configService)

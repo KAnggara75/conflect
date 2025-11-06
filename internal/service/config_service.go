@@ -34,7 +34,7 @@ type ConfigService struct {
 	cfg  *config.Config
 }
 
-func NewConfigService(cfg *config.Config, q *Queue) *ConfigService {
+func NewConfigService(cfg *config.Config) *ConfigService {
 	repo := repository.NewGitRepo(cfg.RepoPath, cfg.RepoURL)
 	err := repo.InitAllBranches()
 	if err != nil {
