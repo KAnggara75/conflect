@@ -17,6 +17,7 @@ package helper
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -28,5 +29,5 @@ func NormalizeRepoURL(rawURL string, token string) string {
 		clean = clean + ".git"
 	}
 
-	return fmt.Sprintf("https://%s@%s", token, clean)
+	return fmt.Sprintf("https://%s@%s", url.QueryEscape(token), clean)
 }
