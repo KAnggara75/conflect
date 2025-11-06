@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build statically linked binary (tanpa CGO)
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o conflect ./cmd/conflect
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -x -ldflags="-s -w" -o conflect ./cmd/conflect
 
 
 # ===========================
