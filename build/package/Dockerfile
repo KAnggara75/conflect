@@ -1,4 +1,6 @@
+# ===========================
 # Stage 1: Build
+# ===========================
 FROM golang:1.25.3-alpine3.22 AS builder
 
 # Set working directory
@@ -14,14 +16,17 @@ COPY . .
 # Build statically linked binary (tanpa CGO)
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o conflect ./cmd/conflect
 
+
+# ===========================
 # Stage 2: Runtime
+# ===========================
 FROM alpine:3.22
 
-# Install git (required for cloning repos)
-RUN apk add --no-cache git ca-certificates && update-ca-certificates
+# Install git dan CA certificates (wajib untuk HTTPS)
+# RUN apk add --no-cache git ca-certificates openssh-client curl && update-ca-certificates
 
 # Tambahkan user non-root
-RUN adduser -D appuser
+RUN adduser -D -u 1001 appuser
 
 # Set working directory
 WORKDIR /app
@@ -29,13 +34,13 @@ WORKDIR /app
 # Copy binary dari builder
 COPY --from=builder /app/conflect .
 
-# ✅ Buat direktori tmp dan berikan akses penuh untuk user appuser
+# Buat direktori kerja untuk clone repo dan berikan akses penuh
 RUN mkdir -p /app/tmp/repo && chown -R appuser:appuser /app
 
-# Ganti user ke non-root
+# Gunakan user non-root
 USER appuser
 
-# Environment variables
+# Environment variables default (bisa dioverride di docker run)
 ENV APP_PORT=8080
 EXPOSE 8080
 
