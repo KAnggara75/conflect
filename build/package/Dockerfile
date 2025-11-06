@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o conflect 
 FROM alpine:3.22
 
 # Install git (required for cloning repos)
-RUN apk add --no-cache git
+RUN apk add --no-cache git ca-certificates && update-ca-certificates
 
 # Tambahkan user non-root
 RUN adduser -D appuser
