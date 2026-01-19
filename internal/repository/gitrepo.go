@@ -53,7 +53,7 @@ func (g *GitRepo) InitAllBranches() error {
 }
 
 func (g *GitRepo) listRemoteBranches() ([]string, error) {
-	cmd := exec.Command("git", "-c", "credential.helper=", "ls-remote", "--heads", g.URL)
+	cmd := exec.Command("git", "ls-remote", "--heads", g.URL)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list remote branches: %w", err)

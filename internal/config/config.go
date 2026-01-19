@@ -38,7 +38,7 @@ func Load() *Config {
 	if err != nil {
 		cwd = "."
 	}
-	defaultRepo := filepath.Join(cwd, "tmp/repo")
+	defaultRepo := filepath.Join(cwd, "/etc/conflect/repo")
 
 	return &Config{
 		Limit:         getEnvInt("RATE_LIMIT", 10), // default 10 requests
