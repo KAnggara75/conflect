@@ -22,7 +22,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -52,9 +51,6 @@ func VerifySignature(cfg AuthConfig) Middleware {
 			mac.Write(body)
 			expected := hex.EncodeToString(mac.Sum(nil))
 			actual := signatureHeader[len(prefix):]
-
-			log.Println(expected)
-			log.Println(actual)
 
 			// Timing-safe compare
 			if !hmac.Equal([]byte(expected), []byte(actual)) {
