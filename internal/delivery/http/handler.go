@@ -16,10 +16,14 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/KAnggara75/conflect/internal/config"
@@ -102,13 +106,46 @@ func (s *Server) Start() error {
 	rootMux.Handle("/", protectedHandler)
 
 	srv := &http.Server{
-		Addr:    ":" + s.cfg.Port,
-		Handler: rootMux,
+		Addr:         ":" + s.cfg.Port,
+		Handler:      rootMux,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
-	log.Printf("🚀 Conflect server running at :%s", s.cfg.Port)
-	return srv.ListenAndServe()
+	// Channel to listen for errors from server
+	serverErrors := make(chan error, 1)
 
+	// Start server in goroutine
+	go func() {
+		log.Printf("🚀 Conflect server running at :%s", s.cfg.Port)
+		serverErrors <- srv.ListenAndServe()
+	}()
+
+	// Channel to listen for OS signals
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// Block until we receive a signal or server error
+	select {
+	case err := <-serverErrors:
+		return err
+	case sig := <-quit:
+		log.Printf("⚠️  Received signal %v, initiating graceful shutdown...", sig)
+	}
+
+	// Create context with timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Attempt graceful shutdown
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("❌ Graceful shutdown failed: %v, forcing exit", err)
+		return srv.Close()
+	}
+
+	log.Println("✅ Server gracefully stopped")
+	return nil
 }
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
