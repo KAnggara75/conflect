@@ -41,7 +41,7 @@ func VerifySignature(cfg AuthConfig) Middleware {
 
 			// Validasi header
 			if !strings.HasPrefix(signatureHeader, prefix) {
-				writeUnauthorized(w, "Failed to Verify signatureHeader")
+				writeUnauthorized(w, "Failed to verify signature header")
 				return
 			}
 

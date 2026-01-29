@@ -207,7 +207,7 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	// kalau tidak ada property sources, return 404
 	if len(resp.PropertySources) == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		resp.Error = "config for " + appName + " with env " + env + " found"
+		resp.Error = "config for " + appName + " with env " + env + " not found"
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
