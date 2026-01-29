@@ -176,9 +176,17 @@ func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(payload.Ref, "/")
 	branch := parts[len(parts)-1]
 
-	s.queue.Enqueue(branch)
-
 	w.Header().Set("Content-Type", "application/json")
+
+	if !s.queue.Enqueue(branch) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"status": "queue_full",
+			"error":  "server busy, please retry later",
+		})
+		return
+	}
+
 	w.WriteHeader(http.StatusAccepted)
 	_ = json.NewEncoder(w).Encode(map[string]string{
 		"status": "accepted",

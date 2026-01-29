@@ -12,8 +12,9 @@
  * @project conflect service
  * https://github.com/KAnggara75/conflect/tree/main/internal/service
  */
-
 package service
+
+import "log"
 
 type Queue struct {
 	ch chan string
@@ -23,8 +24,15 @@ func NewQueue(size int) *Queue {
 	return &Queue{ch: make(chan string, size)}
 }
 
-func (q *Queue) Enqueue(branch string) {
-	q.ch <- branch
+// Enqueue adds a branch to the queue. Returns true if successful, false if queue is full.
+func (q *Queue) Enqueue(branch string) bool {
+	select {
+	case q.ch <- branch:
+		return true
+	default:
+		log.Printf("⚠️  Queue full, dropping branch update: %s", branch)
+		return false
+	}
 }
 
 func (q *Queue) Dequeue() <-chan string {
