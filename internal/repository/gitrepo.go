@@ -12,25 +12,25 @@
  * @project conflect repository
  * https://github.com/KAnggara75/conflect/tree/main/internal/repository
  */
-
 package repository
 
 import (
-	"bufio"
-	"bytes"
+	"errors"
 	"fmt"
+	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/storage/memory"
 )
 
 type GitRepo struct {
 	Path string
 	URL  string
-	Repo *git.Repository
 }
 
 func NewGitRepo(path, url string) *GitRepo {
@@ -53,28 +53,24 @@ func (g *GitRepo) InitAllBranches() error {
 }
 
 func (g *GitRepo) listRemoteBranches() ([]string, error) {
-	cmd := exec.Command("git", "ls-remote", "--heads", g.URL)
-	out, err := cmd.Output()
+	// Create a remote to list references without cloning
+	remote := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+		Name: "origin",
+		URLs: []string{g.URL},
+	})
+
+	refs, err := remote.List(&git.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list remote branches: %w", err)
 	}
 
 	var branches []string
-	scanner := bufio.NewScanner(bytes.NewReader(out))
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Split(line, "\t")
-		if len(parts) != 2 {
-			continue
-		}
-		ref := parts[1]
-		if strings.HasPrefix(ref, "refs/heads/") {
-			branch := strings.TrimPrefix(ref, "refs/heads/")
+	for _, ref := range refs {
+		refName := ref.Name().String()
+		if strings.HasPrefix(refName, "refs/heads/") {
+			branch := strings.TrimPrefix(refName, "refs/heads/")
 			branches = append(branches, branch)
 		}
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
 	}
 
 	return branches, nil
@@ -88,33 +84,20 @@ func (g *GitRepo) EnsureBranch(branch string) (string, error) {
 
 	targetPath := filepath.Join(g.Path, path)
 	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
-		var cmd *exec.Cmd
+		log.Printf("Cloning branch %s into %s\n", branch, targetPath)
 
-		if branch != "" {
-			fmt.Printf("Cloning branch %s into %s\n", branch, targetPath)
-			cmd = exec.Command(
-				"git", "clone",
-				"--branch", branch,
-				"--single-branch",
-				"--depth=1",
-				g.URL,
-				targetPath,
-			)
-		} else {
-			fmt.Printf("Cloning default branch into %s\n", targetPath)
-			cmd = exec.Command(
-				"git", "clone",
-				"--single-branch",
-				"--depth=1",
-				g.URL,
-				targetPath,
-			)
-
+		cloneOpts := &git.CloneOptions{
+			URL:          g.URL,
+			SingleBranch: true,
+			Depth:        1,
 		}
 
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
+		if branch != "" {
+			cloneOpts.ReferenceName = plumbing.NewBranchReferenceName(branch)
+		}
+
+		_, err := git.PlainClone(targetPath, false, cloneOpts)
+		if err != nil {
 			return "", fmt.Errorf("failed to clone branch %s: %w", branch, err)
 		}
 	}
@@ -124,27 +107,43 @@ func (g *GitRepo) EnsureBranch(branch string) (string, error) {
 func (g *GitRepo) Pull(branch string) error {
 	branchPath := filepath.Join(g.Path, branch)
 
-	cmd := exec.Command("git", "-C", branchPath, "pull", "--rebase")
-	cmd.Env = append(os.Environ(),
-		"GIT_TERMINAL_PROMPT=0",
-	)
-	return cmd.Run()
+	repo, err := git.PlainOpen(branchPath)
+	if err != nil {
+		return fmt.Errorf("failed to open repo at %s: %w", branchPath, err)
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return fmt.Errorf("failed to get worktree: %w", err)
+	}
+
+	err = worktree.Pull(&git.PullOptions{
+		RemoteName:    "origin",
+		ReferenceName: plumbing.NewBranchReferenceName(branch),
+		SingleBranch:  true,
+		Force:         true,
+	})
+
+	// Already up-to-date is not an error
+	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return fmt.Errorf("failed to pull branch %s: %w", branch, err)
+	}
+
+	return nil
 }
 
 func (g *GitRepo) GetCommitHashFromBranch(branch string) (string, error) {
 	branchPath := filepath.Join(g.Path, branch)
-	cmd := exec.Command("git", "rev-parse", branch)
 
-	cmd.Dir = branchPath
-
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("git rev-parse error for branch %s: %v (%s)", branchPath, err, stderr.String())
+	repo, err := git.PlainOpen(branchPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open repo at %s: %w", branchPath, err)
 	}
 
-	return strings.TrimSpace(out.String()), nil
+	head, err := repo.Head()
+	if err != nil {
+		return "", fmt.Errorf("failed to get HEAD for branch %s: %w", branch, err)
+	}
+
+	return head.Hash().String(), nil
 }
