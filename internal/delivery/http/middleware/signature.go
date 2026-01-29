@@ -12,7 +12,6 @@
  * @project conflect middleware
  * https://github.com/PakaiWA/PakaiWA/tree/main/internal/delivery/http/middleware
  */
-
 package middleware
 
 import (
