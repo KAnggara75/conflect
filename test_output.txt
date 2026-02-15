@@ -1,0 +1,161 @@
+	github.com/KAnggara75/conflect/cmd/conflect		coverage: 0.0% of statements
+=== RUN   TestGetEnv
+=== RUN   TestGetEnv/Environment_variable_set
+=== RUN   TestGetEnv/Environment_variable_not_set
+--- PASS: TestGetEnv (0.00s)
+    --- PASS: TestGetEnv/Environment_variable_set (0.00s)
+    --- PASS: TestGetEnv/Environment_variable_not_set (0.00s)
+=== RUN   TestGetEnvInt
+=== RUN   TestGetEnvInt/Valid_integer
+=== RUN   TestGetEnvInt/Invalid_integer
+=== RUN   TestGetEnvInt/Empty_value
+=== RUN   TestGetEnvInt/Negative_integer
+--- PASS: TestGetEnvInt (0.00s)
+    --- PASS: TestGetEnvInt/Valid_integer (0.00s)
+    --- PASS: TestGetEnvInt/Invalid_integer (0.00s)
+    --- PASS: TestGetEnvInt/Empty_value (0.00s)
+    --- PASS: TestGetEnvInt/Negative_integer (0.00s)
+=== RUN   TestReadValue
+=== RUN   TestReadValue/Environment_variable_takes_precedence
+=== RUN   TestReadValue/File_value_when_env_not_set
+=== RUN   TestReadValue/Default_value_when_neither_set
+=== RUN   TestReadValue/Trimmed_whitespace_from_env
+--- PASS: TestReadValue (0.00s)
+    --- PASS: TestReadValue/Environment_variable_takes_precedence (0.00s)
+    --- PASS: TestReadValue/File_value_when_env_not_set (0.00s)
+    --- PASS: TestReadValue/Default_value_when_neither_set (0.00s)
+    --- PASS: TestReadValue/Trimmed_whitespace_from_env (0.00s)
+=== RUN   TestLoad
+--- PASS: TestLoad (0.00s)
+=== RUN   TestLoadDefaults
+--- PASS: TestLoadDefaults (0.00s)
+PASS
+coverage: 96.3% of statements
+ok  	github.com/KAnggara75/conflect/internal/config	(cached)	coverage: 96.3% of statements
+	github.com/KAnggara75/conflect/internal/delivery/http		coverage: 0.0% of statements
+?   	github.com/KAnggara75/conflect/internal/delivery/http/dto	[no test files]
+	github.com/KAnggara75/conflect/internal/delivery/http/middleware		coverage: 0.0% of statements
+=== RUN   TestShouldSkipFile
+=== RUN   TestShouldSkipFile/No_error
+=== RUN   TestShouldSkipFile/File_not_found_-_should_skip
+skip file missing.yaml: not found
+=== RUN   TestShouldSkipFile/Permission_denied_-_should_not_skip
+=== RUN   TestShouldSkipFile/Generic_error_-_should_not_skip
+--- PASS: TestShouldSkipFile (0.00s)
+    --- PASS: TestShouldSkipFile/No_error (0.00s)
+    --- PASS: TestShouldSkipFile/File_not_found_-_should_skip (0.00s)
+    --- PASS: TestShouldSkipFile/Permission_denied_-_should_not_skip (0.00s)
+    --- PASS: TestShouldSkipFile/Generic_error_-_should_not_skip (0.00s)
+=== RUN   TestHttpError
+=== RUN   TestHttpError/Not_Found_Error
+=== RUN   TestHttpError/Internal_Server_Error
+=== RUN   TestHttpError/Bad_Request
+=== RUN   TestHttpError/Unauthorized
+--- PASS: TestHttpError (0.00s)
+    --- PASS: TestHttpError/Not_Found_Error (0.00s)
+    --- PASS: TestHttpError/Internal_Server_Error (0.00s)
+    --- PASS: TestHttpError/Bad_Request (0.00s)
+    --- PASS: TestHttpError/Unauthorized (0.00s)
+PASS
+coverage: 100.0% of statements
+ok  	github.com/KAnggara75/conflect/internal/errors	(cached)	coverage: 100.0% of statements
+=== RUN   TestParseFile
+=== RUN   TestParseFile/YAML_simple
+=== RUN   TestParseFile/JSON_simple
+=== RUN   TestParseFile/Properties_file
+=== RUN   TestParseFile/Properties_with_colon_separator
+=== RUN   TestParseFile/Unsupported_extension
+=== RUN   TestParseFile/Invalid_YAML
+=== RUN   TestParseFile/Invalid_JSON
+=== RUN   TestParseFile/YAML_with_arrays
+=== RUN   TestParseFile/Nested_YAML
+--- PASS: TestParseFile (0.00s)
+    --- PASS: TestParseFile/YAML_simple (0.00s)
+    --- PASS: TestParseFile/JSON_simple (0.00s)
+    --- PASS: TestParseFile/Properties_file (0.00s)
+    --- PASS: TestParseFile/Properties_with_colon_separator (0.00s)
+    --- PASS: TestParseFile/Unsupported_extension (0.00s)
+    --- PASS: TestParseFile/Invalid_YAML (0.00s)
+    --- PASS: TestParseFile/Invalid_JSON (0.00s)
+    --- PASS: TestParseFile/YAML_with_arrays (0.00s)
+    --- PASS: TestParseFile/Nested_YAML (0.00s)
+=== RUN   TestParsePrimitive
+=== RUN   TestParsePrimitive/Integer
+=== RUN   TestParsePrimitive/Negative_integer
+=== RUN   TestParsePrimitive/Float
+=== RUN   TestParsePrimitive/Boolean_true
+=== RUN   TestParsePrimitive/Boolean_false
+=== RUN   TestParsePrimitive/String
+=== RUN   TestParsePrimitive/Empty_string
+--- PASS: TestParsePrimitive (0.00s)
+    --- PASS: TestParsePrimitive/Integer (0.00s)
+    --- PASS: TestParsePrimitive/Negative_integer (0.00s)
+    --- PASS: TestParsePrimitive/Float (0.00s)
+    --- PASS: TestParsePrimitive/Boolean_true (0.00s)
+    --- PASS: TestParsePrimitive/Boolean_false (0.00s)
+    --- PASS: TestParsePrimitive/String (0.00s)
+    --- PASS: TestParsePrimitive/Empty_string (0.00s)
+=== RUN   TestParseProperties
+=== RUN   TestParseProperties/Basic_properties
+=== RUN   TestParseProperties/Properties_with_comments
+=== RUN   TestParseProperties/Properties_with_types
+=== RUN   TestParseProperties/Empty_lines
+--- PASS: TestParseProperties (0.00s)
+    --- PASS: TestParseProperties/Basic_properties (0.00s)
+    --- PASS: TestParseProperties/Properties_with_comments (0.00s)
+    --- PASS: TestParseProperties/Properties_with_types (0.00s)
+    --- PASS: TestParseProperties/Empty_lines (0.00s)
+=== RUN   TestNormalizeRepoURL
+=== RUN   TestNormalizeRepoURL/URL_with_https_prefix
+=== RUN   TestNormalizeRepoURL/URL_with_http_prefix
+=== RUN   TestNormalizeRepoURL/URL_without_protocol
+=== RUN   TestNormalizeRepoURL/URL_already_with_.git_suffix
+=== RUN   TestNormalizeRepoURL/URL_with_special_characters_in_token
+=== RUN   TestNormalizeRepoURL/Empty_token
+--- PASS: TestNormalizeRepoURL (0.00s)
+    --- PASS: TestNormalizeRepoURL/URL_with_https_prefix (0.00s)
+    --- PASS: TestNormalizeRepoURL/URL_with_http_prefix (0.00s)
+    --- PASS: TestNormalizeRepoURL/URL_without_protocol (0.00s)
+    --- PASS: TestNormalizeRepoURL/URL_already_with_.git_suffix (0.00s)
+    --- PASS: TestNormalizeRepoURL/URL_with_special_characters_in_token (0.00s)
+    --- PASS: TestNormalizeRepoURL/Empty_token (0.00s)
+PASS
+coverage: 86.4% of statements
+ok  	github.com/KAnggara75/conflect/internal/helper	(cached)	coverage: 86.4% of statements
+	github.com/KAnggara75/conflect/internal/repository		coverage: 0.0% of statements
+=== RUN   TestNewQueue
+=== RUN   TestNewQueue/Standard_queue_size
+=== RUN   TestNewQueue/Small_queue
+=== RUN   TestNewQueue/Large_queue
+--- PASS: TestNewQueue (0.00s)
+    --- PASS: TestNewQueue/Standard_queue_size (0.00s)
+    --- PASS: TestNewQueue/Small_queue (0.00s)
+    --- PASS: TestNewQueue/Large_queue (0.00s)
+=== RUN   TestQueue_Enqueue
+2026/02/15 18:24:30 ⚠️  Queue full, dropping branch update: branch4
+--- PASS: TestQueue_Enqueue (0.00s)
+=== RUN   TestQueue_Dequeue
+--- PASS: TestQueue_Dequeue (0.00s)
+=== RUN   TestQueue_EnqueueDequeue
+--- PASS: TestQueue_EnqueueDequeue (0.00s)
+PASS
+coverage: 8.3% of statements
+ok  	github.com/KAnggara75/conflect/internal/service	0.604s	coverage: 8.3% of statements
+=== RUN   TestNewRateLimiter
+--- PASS: TestNewRateLimiter (0.00s)
+=== RUN   TestRateLimiter_IsAllow
+--- PASS: TestRateLimiter_IsAllow (0.15s)
+=== RUN   TestRateLimiter_MultipleKeys
+--- PASS: TestRateLimiter_MultipleKeys (0.00s)
+=== RUN   TestRateLimiter_Cleanup
+--- PASS: TestRateLimiter_Cleanup (0.15s)
+=== RUN   TestRateLimiter_ConcurrentAccess
+--- PASS: TestRateLimiter_ConcurrentAccess (0.00s)
+=== RUN   TestRateLimiter_Stop
+--- PASS: TestRateLimiter_Stop (0.00s)
+=== RUN   TestRateLimiter_WindowSliding
+--- PASS: TestRateLimiter_WindowSliding (0.11s)
+PASS
+coverage: 94.3% of statements
+ok  	github.com/KAnggara75/conflect/internal/util	(cached)	coverage: 94.3% of statements
+	github.com/KAnggara75/conflect/internal/worker		coverage: 0.0% of statements
