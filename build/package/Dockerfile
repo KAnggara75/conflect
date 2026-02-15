@@ -1,7 +1,7 @@
 # ===========================
 # Stage 1: Build
 # ===========================
-FROM golang:alpine3.22 AS builder
+FROM golang:1.25.1-bookworm AS builder
 
 # Set working directory
 WORKDIR /app
@@ -13,20 +13,20 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build statically linked binary (tanpa CGO)
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -x -ldflags="-s -w" -o conflect ./cmd/conflect
+# WAJIB: CGO aktif, JANGAN strip simbol
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o conflect ./cmd/conflect
 
 
 # ===========================
-# Stage 2: Runtime
+# Stage 2: Runtime (glibc, bukan Alpine)
 # ===========================
-FROM alpine:3.22
+FROM debian:bookworm-slim
 
-# Install git dan CA certificates (wajib untuk HTTPS)
-RUN apk add --no-cache git ca-certificates && update-ca-certificates
+# CA certs tetap dibutuhkan
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Tambahkan user non-root
-RUN adduser -D -u 1001 appuser
+# Tambahkan user non-root (tetap sama konsepnya)
+RUN useradd -u 1001 -m appuser
 
 # Set working directory
 WORKDIR /app
