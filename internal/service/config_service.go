@@ -90,6 +90,10 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 	if err == nil {
 		response.Version = hash
 	}
+
+	return response
+}
+
 // isSafePathComponent checks that s can safely be used as a single path component.
 // It rejects empty strings, path separators, and parent directory references.
 func isSafePathComponent(s string) bool {
@@ -103,10 +107,6 @@ func isSafePathComponent(s string) bool {
 		return false
 	}
 	return true
-}
-
-
-	return response
 }
 
 func (c *ConfigService) generateConfigCandidates(appName, env, label string) ([]string, error) {
