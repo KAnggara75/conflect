@@ -56,8 +56,19 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 		PropertySources: []dto.PropertySource{}, // inisialisasi slice kosong
 	}
 
+	// validate inputs used as path components to avoid directory traversal
+	if !isSafePathComponent(appName) || !isSafePathComponent(env) {
+		log.Printf("invalid appName or env: appName=%q, env=%q", appName, env)
+		return response
+	}
+
 	if label == "" {
 		label = c.cfg.DefaultBranch
+	}
+
+	if !isSafePathComponent(label) {
+		log.Printf("invalid label: %q", label)
+		return response
 	}
 
 	response.Label = label
@@ -79,6 +90,21 @@ func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigRespon
 	if err == nil {
 		response.Version = hash
 	}
+// isSafePathComponent checks that s can safely be used as a single path component.
+// It rejects empty strings, path separators, and parent directory references.
+func isSafePathComponent(s string) bool {
+	if s == "" {
+		return false
+	}
+	if strings.Contains(s, "/") || strings.Contains(s, "\\") {
+		return false
+	}
+	if strings.Contains(s, "..") {
+		return false
+	}
+	return true
+}
+
 
 	return response
 }
