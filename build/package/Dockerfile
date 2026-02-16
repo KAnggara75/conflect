@@ -3,52 +3,53 @@
 # ===========================
 FROM golang:1.25.1-bookworm AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependency files and download modules
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
-# Copy source code
 COPY . .
 
-# WAJIB: CGO aktif, JANGAN strip simbol
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o conflect ./cmd/conflect
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
+    go build -trimpath -o conflect ./cmd/conflect
 
 
 # ===========================
-# Stage 2: Runtime (glibc, bukan Alpine)
+# Stage 2: Runtime
 # ===========================
 FROM debian:bookworm-slim
 
-# CA certs tetap dibutuhkan
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    tzdata \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Tambahkan user non-root (tetap sama konsepnya)
-RUN useradd -u 1001 -m appuser
+RUN useradd -u 1001 -m -s /usr/sbin/nologin appuser
 
-# Set working directory
 WORKDIR /app
 
-# Copy binary dari builder
-COPY --from=builder /app/conflect .
+COPY --from=builder /app/conflect /app/conflect
 
-# Buat direktori kerja untuk clone repo dan berikan akses penuh
 RUN mkdir -p /app/tmp/repo && chown -R appuser:appuser /app
 
-# Gunakan user non-root
 USER appuser
 
-# Environment variables default (bisa dioverride di docker run)
 ENV APP_PORT=8080
+ENV OTEL_ENABLED=false
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=""
+ENV GOMAXPROCS=2
+
 EXPOSE 8080
 
-# Labels (metadata image)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:${APP_PORT}/health || exit 1
+
 LABEL org.opencontainers.image.title="Conflect" \
       org.opencontainers.image.description="Spring Cloud Config alternative in Go" \
       org.opencontainers.image.source="https://github.com/KAnggara75/conflect" \
       org.opencontainers.image.licenses="Apache-2.0"
 
-# Jalankan aplikasi
-ENTRYPOINT ["./conflect"]
+ENTRYPOINT ["/app/conflect"]

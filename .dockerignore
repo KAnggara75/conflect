@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+test_output.txt
+
+# Development
+.air.toml
+.pre-commit-config.yaml
+Makefile
+
+# Documentation
+README.md
+LICENSE
+SECURITY.md
+TESTING.md
+TEST_SUMMARY.md
+*.md
+
+# Test files
+*_test.go
+testdata
+loadTest
+
+# Temporary files
+tmp
+.DS_Store
+etc
+
+# Build output
+build/package/Dockerfile
