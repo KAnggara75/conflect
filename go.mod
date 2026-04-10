@@ -3,7 +3,7 @@ module github.com/KAnggara75/conflect
 go 1.25.1
 
 require (
-	github.com/go-git/go-git/v5 v5.17.1
+	github.com/go-git/go-git/v5 v5.17.2
 	github.com/prometheus/client_golang v1.23.2
 	gopkg.in/yaml.v3 v3.0.1
 )
