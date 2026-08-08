@@ -13,27 +13,27 @@
 
 ### ✅ Excellent Coverage (>90%)
 
-| Package | Coverage | Test Files | Status |
-|---------|----------|------------|--------|
-| `internal/errors` | 100.0% | 2 | ✅ Perfect |
-| `internal/config` | 96.3% | 1 | ✅ Excellent |
-| `internal/util` | 94.3% | 1 | ✅ Excellent |
+| Package           | Coverage | Test Files | Status    |
+| ----------------- | -------- | ---------- | --------- |
+| `internal/errors` | 100.0%   | 2          | Perfect   |
+| `internal/config` | 96.3%    | 1          | Excellent |
+| `internal/util`   | 94.3%    | 1          | Excellent |
 
 ### ✅ Good Coverage (70-90%)
 
-| Package | Coverage | Test Files | Status |
-|---------|----------|------------|--------|
-| `internal/helper` | 86.4% | 2 | ✅ Good |
+| Package           | Coverage | Test Files | Status |
+| ----------------- | -------- | ---------- | ------ |
+| `internal/helper` | 86.4%    | 2          | Good   |
 
 ### ⚠️ Needs Improvement (<70%)
 
-| Package | Coverage | Test Files | Status |
-|---------|----------|------------|--------|
-| `internal/service` | 8.3% | 1 | ⚠️ Partial |
-| `internal/repository` | 0.0% | 0 | ❌ No Tests |
-| `internal/delivery/http` | 0.0% | 0 | ❌ No Tests |
-| `internal/worker` | 0.0% | 0 | ❌ No Tests |
-| `cmd/conflect` | 0.0% | 0 | ❌ No Tests |
+| Package                  | Coverage | Test Files | Status   |
+| ------------------------ | -------- | ---------- | -------- |
+| `internal/service`       | 8.3%     | 1          | Partial  |
+| `internal/repository`    | 0.0%     | 0          | No Tests |
+| `internal/delivery/http` | 0.0%     | 0          | No Tests |
+| `internal/worker`        | 0.0%     | 0          | No Tests |
+| `cmd/conflect`           | 0.0%     | 0          | No Tests |
 
 ## Test Files Created
 
@@ -204,13 +204,13 @@ GitHub Actions workflow:
 
 ## Coverage Goals
 
-| Timeframe | Target Coverage | Focus Areas |
-|-----------|----------------|-------------|
-| Current | 32.0% | ✅ Core utilities |
-| Week 1 | 50% | HTTP handlers |
-| Week 2 | 65% | Service layer |
-| Week 3 | 75% | Repository layer |
-| Month 1 | 80%+ | Integration tests |
+| Timeframe | Target Coverage | Focus Areas       |
+| --------- | --------------- | ----------------- |
+| Current   | 32.0%           | ✅ Core utilities  |
+| Week 1    | 50%             | HTTP handlers     |
+| Week 2    | 65%             | Service layer     |
+| Week 3    | 75%             | Repository layer  |
+| Month 1   | 80%+            | Integration tests |
 
 ## Test Quality Metrics
 

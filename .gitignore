@@ -32,3 +32,4 @@ go.work.sum
  .vscode/
 repo/
 tmp/
+issue.md

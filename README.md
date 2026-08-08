@@ -19,16 +19,16 @@ A distributed configuration server for managing application configurations acros
 
 ### Coverage by Package
 
-| Package | Coverage | Status |
-|---------|----------|--------|
-| `internal/config` | 96.3% | ✅ Excellent |
-| `internal/errors` | 100.0% | ✅ Perfect |
-| `internal/helper` | 86.4% | ✅ Good |
-| `internal/util` | 94.3% | ✅ Excellent |
-| `internal/service` | 8.3% | ⚠️ Needs Improvement |
-| `internal/repository` | 0.0% | ❌ No Tests |
-| `internal/delivery/http` | 0.0% | ❌ No Tests |
-| `internal/worker` | 0.0% | ❌ No Tests |
+| Package                  | Coverage | Status            |
+| ------------------------ | -------- | ----------------- |
+| `internal/config`        | 96.3%    | Excellent         |
+| `internal/errors`        | 100.0%   | Perfect           |
+| `internal/helper`        | 86.4%    | Good              |
+| `internal/util`          | 94.3%    | Excellent         |
+| `internal/service`       | 8.3%     | Needs Improvement |
+| `internal/repository`    | 0.0%     | No Tests          |
+| `internal/delivery/http` | 0.0%     | No Tests          |
+| `internal/worker`        | 0.0%     | No Tests          |
 
 ### Detailed Coverage Report
 
@@ -67,15 +67,15 @@ go get github.com/KAnggara75/conflect
 
 Conflect can be configured using environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `APP_PORT` | HTTP server port | `8080` |
-| `RATE_LIMIT` | Rate limit (requests per minute) | `10` |
-| `REPO_PATH` | Local path for git repository | `./etc/conflect/repo` |
-| `REPO_URL` | Git repository URL | - |
-| `DEFAULT_BRANCH` | Default git branch | `main` |
-| `APP_AUTH_SECRET` | Authentication token | - |
-| `GIT_AUTH_TOKEN` | Git authentication token | - |
+| Variable          | Description                      | Default               |
+| ----------------- | -------------------------------- | --------------------- |
+| `APP_PORT`        | HTTP server port                 | `8080`                |
+| `RATE_LIMIT`      | Rate limit (requests per minute) | `10`                  |
+| `REPO_PATH`       | Local path for git repository    | `./etc/conflect/repo` |
+| `REPO_URL`        | Git repository URL               | -                     |
+| `DEFAULT_BRANCH`  | Default git branch               | `main`                |
+| `APP_AUTH_SECRET` | Authentication token             | -                     |
+| `GIT_AUTH_TOKEN`  | Git authentication token         | -                     |
 
 ### File-based Secrets
 
