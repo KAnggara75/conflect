@@ -152,7 +152,7 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	resp := map[string]interface{}{
+	resp := map[string]any{
 		"status": "ok",
 		"code":   http.StatusOK,
 	}
