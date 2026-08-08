@@ -27,23 +27,23 @@ graph TD
         end
     end
 
+    subgraph "Worker Layer (internal/worker)"
+        Queue -->|Dequeue Job| AsyncWorker[Background Worker]
+    end
+
     subgraph "Service Layer (internal/service)"
         ConfigHandler -->|Fetch Config| ConfigSvc[ConfigService]
         WebhookHandler -->|Enqueue Update| Queue[Buffered Queue Channel]
         ConfigSvc -->|Priority Merge| ConfigResolver[Property Parser & Merger]
     end
 
-    subgraph "Worker Layer (internal/worker)"
-        Queue -->|Dequeue Job| AsyncWorker[Background Worker]
-    end
-
     subgraph "Repository Layer (internal/repository)"
-        ConfigResolver -->|Read Raw Files| GitRepo[GitRepo Repository]
-        AsyncWorker -->|Sync / Pull| GitRepo
+        AsyncWorker -->|Pull & Sync Only| GitRepo[GitRepo Repository]
     end
 
     subgraph "Storage & Infrastructure Layer"
-        GitRepo -->|FileSystem Read / Write| LocalRepo[(Local Git Clone Directory)]
+        ConfigResolver -->|Read Files Directly| LocalRepo[(Local Git Clone Directory)]
+        GitRepo -->|Update / Sync Disk| LocalRepo
         RemoteGit[(Remote Git Repository)] -->|Git Pull / Fetch| GitRepo
     end
 ```
