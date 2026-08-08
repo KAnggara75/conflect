@@ -42,7 +42,7 @@ func (g *GitRepo) InitAllBranches() error {
 		return errors.New("repository URL is empty (please set REPO_URL environment variable or REPO_URL_FILE)")
 	}
 
-	log.Printf("🔍 Fetching remote branch list from URL: %s", g.URL)
+	log.Printf("🔍 Fetching remote branch list...")
 	branches, err := g.listRemoteBranches()
 	if err != nil {
 		return err
@@ -72,14 +72,14 @@ func (g *GitRepo) listRemoteBranches() ([]string, error) {
 
 	refs, err := remote.List(&git.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list remote branches from %s: %w", g.URL, err)
+		return nil, fmt.Errorf("failed to list remote branches: %w", err)
 	}
 
 	var branches []string
 	for _, ref := range refs {
 		refName := ref.Name().String()
-		if strings.HasPrefix(refName, "refs/heads/") {
-			branch := strings.TrimPrefix(refName, "refs/heads/")
+		if after, ok := strings.CutPrefix(refName, "refs/heads/"); ok {
+			branch := after
 			branches = append(branches, branch)
 		}
 	}
@@ -95,7 +95,7 @@ func (g *GitRepo) EnsureBranch(branch string) (string, error) {
 
 	targetPath := filepath.Join(g.Path, path)
 	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
-		log.Printf("📦 Cloning branch %q from URL %s into %s...", branch, g.URL, targetPath)
+		log.Printf("📦 Cloning branch %q into %s...", branch, targetPath)
 
 		cloneOpts := &git.CloneOptions{
 			URL:          g.URL,
