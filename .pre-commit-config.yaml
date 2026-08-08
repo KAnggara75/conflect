@@ -16,7 +16,7 @@ repos:
       - id: go-imports-repo
         args:
           - "-local"
-          - "github.com/PakaiWA/PakaiWA"
+          - "github.com/KAnggara75/conflect"
           - "-w"
       - id: go-vet-repo-mod
       # TODO enable this
