@@ -21,7 +21,7 @@ func TestParseFile(t *testing.T) {
 		name     string
 		data     []byte
 		ext      string
-		expected map[string]interface{}
+		expected map[string]any
 		wantErr  bool
 	}{
 		{
@@ -32,7 +32,7 @@ server:
   host: localhost
 `),
 			ext: ".yaml",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"server.port": int(8080),
 				"server.host": "localhost",
 			},
@@ -47,7 +47,7 @@ server:
   }
 }`),
 			ext: ".json",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"server.port": float64(8080),
 				"server.host": "localhost",
 			},
@@ -63,7 +63,7 @@ database.enabled=true
 database.timeout=30.5
 `),
 			ext: ".properties",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"server.port":      int64(8080),
 				"server.host":      "localhost",
 				"database.enabled": true,
@@ -78,7 +78,7 @@ server.port:8080
 server.host:localhost
 `),
 			ext: ".properties",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"server.port": int64(8080),
 				"server.host": "localhost",
 			},
@@ -114,8 +114,8 @@ items:
   - item3
 `),
 			ext: ".yml",
-			expected: map[string]interface{}{
-				"items": []interface{}{"item1", "item2", "item3"},
+			expected: map[string]any{
+				"items": []any{"item1", "item2", "item3"},
 			},
 			wantErr: false,
 		},
@@ -131,7 +131,7 @@ database:
     max: 20
 `),
 			ext: ".yaml",
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"database.connection.host": "localhost",
 				"database.connection.port": int(5432),
 				"database.pool.min":        int(5),
@@ -159,7 +159,7 @@ func TestParsePrimitive(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected interface{}
+		expected any
 	}{
 		{
 			name:     "Integer",
@@ -213,7 +213,7 @@ func TestParseProperties(t *testing.T) {
 	tests := []struct {
 		name     string
 		data     []byte
-		expected map[string]interface{}
+		expected map[string]any
 	}{
 		{
 			name: "Basic properties",
@@ -221,7 +221,7 @@ func TestParseProperties(t *testing.T) {
 key1=value1
 key2=value2
 `),
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"key1": "value1",
 				"key2": "value2",
 			},
@@ -234,7 +234,7 @@ key1=value1
 ! Another comment
 key2=value2
 `),
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"key1": "value1",
 				"key2": "value2",
 			},
@@ -247,7 +247,7 @@ host=localhost
 enabled=true
 timeout=30.5
 `),
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"port":    int64(8080),
 				"host":    "localhost",
 				"enabled": true,
@@ -262,7 +262,7 @@ key1=value1
 key2=value2
 
 `),
-			expected: map[string]interface{}{
+			expected: map[string]any{
 				"key1": "value1",
 				"key2": "value2",
 			},

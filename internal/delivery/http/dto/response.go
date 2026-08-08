@@ -25,6 +25,6 @@ type ConfigResponse struct {
 }
 
 type PropertySource struct {
-	Name   string                 `json:"name"`
-	Source map[string]interface{} `json:"source"`
+	Name   string         `json:"name"`
+	Source map[string]any `json:"source"`
 }

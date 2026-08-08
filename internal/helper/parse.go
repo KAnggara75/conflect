@@ -26,18 +26,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func ParseFile(data []byte, ext string) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
+func ParseFile(data []byte, ext string) (map[string]any, error) {
+	out := make(map[string]any)
 
 	switch ext {
 	case ".yaml", ".yml":
-		var m map[string]interface{}
+		var m map[string]any
 		if err := yaml.Unmarshal(data, &m); err != nil {
 			return nil, fmt.Errorf("yaml unmarshal: %w", err)
 		}
 		flattenMap("", m, out)
 	case ".json":
-		var m map[string]interface{}
+		var m map[string]any
 		if err := json.Unmarshal(data, &m); err != nil {
 			return nil, fmt.Errorf("json unmarshal: %w", err)
 		}
@@ -55,9 +55,9 @@ func ParseFile(data []byte, ext string) (map[string]interface{}, error) {
 }
 
 // flattenMap flattens nested maps into dot.notation keys
-func flattenMap(prefix string, cur interface{}, out map[string]interface{}) {
+func flattenMap(prefix string, cur any, out map[string]any) {
 	switch t := cur.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		for k, v := range t {
 			var key string
 			if prefix == "" {
@@ -67,7 +67,7 @@ func flattenMap(prefix string, cur interface{}, out map[string]interface{}) {
 			}
 			flattenMap(key, v, out)
 		}
-	case map[interface{}]interface{}: // in case yaml produced interface{} keys
+	case map[any]any: // in case yaml produced any keys
 		for kk, vv := range t {
 			k := fmt.Sprintf("%v", kk)
 			var key string
@@ -78,7 +78,7 @@ func flattenMap(prefix string, cur interface{}, out map[string]interface{}) {
 			}
 			flattenMap(key, vv, out)
 		}
-	case []interface{}:
+	case []any:
 		// keep slices as-is (consumer can interpret), placed at prefix key
 		out[prefix] = t
 	default:
@@ -86,8 +86,8 @@ func flattenMap(prefix string, cur interface{}, out map[string]interface{}) {
 	}
 }
 
-func parseProperties(data []byte) map[string]interface{} {
-	res := make(map[string]interface{})
+func parseProperties(data []byte) map[string]any {
+	res := make(map[string]any)
 	s := bufio.NewScanner(bytes.NewReader(data))
 	for s.Scan() {
 		line := strings.TrimSpace(s.Text())
@@ -110,7 +110,7 @@ func parseProperties(data []byte) map[string]interface{} {
 	return res
 }
 
-func parsePrimitive(s string) interface{} {
+func parsePrimitive(s string) any {
 	// try int
 	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
 		return i
