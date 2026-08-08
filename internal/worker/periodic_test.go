@@ -15,10 +15,13 @@
 package worker
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/KAnggara75/conflect/internal/config"
+	"github.com/KAnggara75/conflect/internal/repository"
 	"github.com/KAnggara75/conflect/internal/service"
 )
 
@@ -54,5 +57,30 @@ func TestStartPeriodicPull_NilConfig(t *testing.T) {
 		// Function returned immediately because cfg is nil
 	case <-time.After(1 * time.Second):
 		t.Fatal("StartPeriodicPull should return immediately when cfg is nil")
+	}
+}
+
+func TestStartPeriodicPull_Active(t *testing.T) {
+	q := service.NewQueue(10)
+	tmpDir := t.TempDir()
+	_ = os.MkdirAll(filepath.Join(tmpDir, "main"), 0755)
+
+	cfg := &config.Config{
+		RepoPath:     tmpDir,
+		PullInterval: 1, // 1 second interval
+	}
+	repo := repository.NewGitRepo(tmpDir, "")
+	cs := service.NewConfigServiceFromRepo(repo, cfg)
+
+	go StartPeriodicPull(cfg, q, cs)
+
+	// Dequeue channel should receive branch within 2 seconds
+	select {
+	case branch := <-q.Dequeue():
+		if branch != "main" {
+			t.Errorf("expected branch 'main', got '%s'", branch)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("expected branch to be enqueued by periodic pull ticker")
 	}
 }

@@ -43,6 +43,10 @@ func NewConfigService(cfg *config.Config) *ConfigService {
 	return &ConfigService{repo: repo, cfg: cfg}
 }
 
+func NewConfigServiceFromRepo(repo *repository.GitRepo, cfg *config.Config) *ConfigService {
+	return &ConfigService{repo: repo, cfg: cfg}
+}
+
 func (c *ConfigService) UpdateRepo(branch string) error {
 	log.Printf("Pulling latest config for branch %s...", branch)
 	return c.repo.Pull(branch)
