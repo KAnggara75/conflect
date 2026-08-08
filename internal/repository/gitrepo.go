@@ -38,10 +38,17 @@ func NewGitRepo(path, url string) *GitRepo {
 }
 
 func (g *GitRepo) InitAllBranches() error {
+	if strings.TrimSpace(g.URL) == "" {
+		return errors.New("repository URL is empty (please set REPO_URL environment variable or REPO_URL_FILE)")
+	}
+
+	log.Printf("🔍 Fetching remote branch list from URL: %s", g.URL)
 	branches, err := g.listRemoteBranches()
 	if err != nil {
 		return err
 	}
+
+	log.Printf("📋 Found %d remote branch(es): %v", len(branches), branches)
 
 	for _, branch := range branches {
 		if _, err := g.EnsureBranch(branch); err != nil {
@@ -53,6 +60,10 @@ func (g *GitRepo) InitAllBranches() error {
 }
 
 func (g *GitRepo) listRemoteBranches() ([]string, error) {
+	if strings.TrimSpace(g.URL) == "" {
+		return nil, errors.New("repository URL is empty (please set REPO_URL environment variable or REPO_URL_FILE)")
+	}
+
 	// Create a remote to list references without cloning
 	remote := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
@@ -61,7 +72,7 @@ func (g *GitRepo) listRemoteBranches() ([]string, error) {
 
 	refs, err := remote.List(&git.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list remote branches: %w", err)
+		return nil, fmt.Errorf("failed to list remote branches from %s: %w", g.URL, err)
 	}
 
 	var branches []string
@@ -84,7 +95,7 @@ func (g *GitRepo) EnsureBranch(branch string) (string, error) {
 
 	targetPath := filepath.Join(g.Path, path)
 	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
-		log.Printf("Cloning branch %s into %s\n", branch, targetPath)
+		log.Printf("📦 Cloning branch %q from URL %s into %s...", branch, g.URL, targetPath)
 
 		cloneOpts := &git.CloneOptions{
 			URL:          g.URL,
@@ -98,8 +109,12 @@ func (g *GitRepo) EnsureBranch(branch string) (string, error) {
 
 		_, err := git.PlainClone(targetPath, false, cloneOpts)
 		if err != nil {
+			log.Printf("❌ Failed to clone branch %q into %s: %v", branch, targetPath, err)
 			return "", fmt.Errorf("failed to clone branch %s: %w", branch, err)
 		}
+		log.Printf("✅ Successfully cloned branch %q into %s", branch, targetPath)
+	} else {
+		log.Printf("ℹ️ Branch %q directory already exists at %s", branch, targetPath)
 	}
 	return targetPath, nil
 }
