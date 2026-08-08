@@ -33,6 +33,7 @@ func main() {
 
 	// start worker
 	go worker.Start(queue, configService)
+	go worker.StartPeriodicPull(cfg, queue, configService)
 
 	// start HTTP server
 	server := http.NewServer(cfg, queue, configService)

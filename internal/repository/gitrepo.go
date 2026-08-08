@@ -162,3 +162,18 @@ func (g *GitRepo) GetCommitHashFromBranch(branch string) (string, error) {
 
 	return head.Hash().String(), nil
 }
+
+func (g *GitRepo) ListLocalBranches() ([]string, error) {
+	entries, err := os.ReadDir(g.Path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read repo dir at %s: %w", g.Path, err)
+	}
+
+	var branches []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			branches = append(branches, entry.Name())
+		}
+	}
+	return branches, nil
+}

@@ -52,6 +52,10 @@ func (c *ConfigService) GetBranchSHA(branch string) (string, error) {
 	return c.repo.GetCommitHashFromBranch(branch)
 }
 
+func (c *ConfigService) ListBranches() ([]string, error) {
+	return c.repo.ListLocalBranches()
+}
+
 func (c *ConfigService) LoadConfig(appName, env, label string) *dto.ConfigResponse {
 
 	response := &dto.ConfigResponse{
