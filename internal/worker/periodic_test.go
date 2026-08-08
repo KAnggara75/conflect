@@ -84,3 +84,38 @@ func TestStartPeriodicPull_Active(t *testing.T) {
 		t.Fatal("expected branch to be enqueued by periodic pull ticker")
 	}
 }
+
+func TestStartPeriodicPull_ListBranchesError(t *testing.T) {
+	q := service.NewQueue(10)
+	nonExistentDir := filepath.Join(t.TempDir(), "nonexistent")
+
+	cfg := &config.Config{
+		RepoPath:     nonExistentDir,
+		PullInterval: 1,
+	}
+	repo := repository.NewGitRepo(nonExistentDir, "")
+	cs := service.NewConfigServiceFromRepo(repo, cfg)
+
+	go StartPeriodicPull(cfg, q, cs)
+
+	// Ticker should run, fail to list branches (lines 41-42), and not panic or deadlock
+	time.Sleep(1200 * time.Millisecond)
+}
+
+func TestStartPeriodicPull_QueueFull(t *testing.T) {
+	q := service.NewQueue(0) // Queue with capacity 0 (always full)
+	tmpDir := t.TempDir()
+	_ = os.MkdirAll(filepath.Join(tmpDir, "main"), 0755)
+
+	cfg := &config.Config{
+		RepoPath:     tmpDir,
+		PullInterval: 1,
+	}
+	repo := repository.NewGitRepo(tmpDir, "")
+	cs := service.NewConfigServiceFromRepo(repo, cfg)
+
+	go StartPeriodicPull(cfg, q, cs)
+
+	// Ticker will trigger, list branches, attempt to enqueue, hit queue full branch (lines 49-50)
+	time.Sleep(1200 * time.Millisecond)
+}
