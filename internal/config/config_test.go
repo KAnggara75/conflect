@@ -221,6 +221,7 @@ func TestLoad(t *testing.T) {
 	os.Setenv("APP_PORT", "9090")
 	os.Setenv("RATE_LIMIT", "20")
 	os.Setenv("DEFAULT_BRANCH", "develop")
+	os.Setenv("PULL_INTERVAL", "60")
 
 	cfg := Load()
 
@@ -236,6 +237,10 @@ func TestLoad(t *testing.T) {
 		t.Errorf("Load() DefaultBranch = %s, want develop", cfg.DefaultBranch)
 	}
 
+	if cfg.PullInterval != 60 {
+		t.Errorf("Load() PullInterval = %d, want 60", cfg.PullInterval)
+	}
+
 	if cfg.RepoPath == "" {
 		t.Error("Load() RepoPath should not be empty")
 	}
@@ -246,6 +251,7 @@ func TestLoadDefaults(t *testing.T) {
 	os.Unsetenv("APP_PORT")
 	os.Unsetenv("RATE_LIMIT")
 	os.Unsetenv("DEFAULT_BRANCH")
+	os.Unsetenv("PULL_INTERVAL")
 	os.Unsetenv("REPO_URL")
 	os.Unsetenv("REPO_PATH")
 
@@ -261,5 +267,9 @@ func TestLoadDefaults(t *testing.T) {
 
 	if cfg.DefaultBranch != "main" {
 		t.Errorf("Load() default DefaultBranch = %s, want main", cfg.DefaultBranch)
+	}
+
+	if cfg.PullInterval != 0 {
+		t.Errorf("Load() default PullInterval = %d, want 0", cfg.PullInterval)
 	}
 }

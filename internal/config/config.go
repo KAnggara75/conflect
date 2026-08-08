@@ -31,6 +31,7 @@ type Config struct {
 	DefaultBranch string
 	Limit         int
 	Token         string
+	PullInterval  int
 }
 
 func Load() *Config {
@@ -47,6 +48,7 @@ func Load() *Config {
 		RepoURL:       buildRepoURL(),
 		DefaultBranch: getEnv("DEFAULT_BRANCH", "main"),
 		Token:         readValue("APP_AUTH_SECRET", "APP_AUTH_SECRET_FILE", ""),
+		PullInterval:  getEnvInt("PULL_INTERVAL", 0),
 	}
 }
 
