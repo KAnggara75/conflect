@@ -165,7 +165,8 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		Ref string `json:"ref"`
+		Ref   string `json:"ref"`
+		After string `json:"after"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -175,8 +176,27 @@ func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
 
 	parts := strings.Split(payload.Ref, "/")
 	branch := parts[len(parts)-1]
+	after := payload.After
+
+	log.Printf("🔔 Webhook received for branch %q: after=%s", branch, after)
 
 	w.Header().Set("Content-Type", "application/json")
+
+	if after != "" && s.configService != nil {
+		if currentSHA, err := s.configService.GetBranchSHA(branch); err == nil && currentSHA != "" {
+			if strings.EqualFold(strings.TrimSpace(currentSHA), strings.TrimSpace(after)) {
+				log.Printf("ℹ️ Branch %q is already up to date at commit %s, skipping queue", branch, after)
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"status":  "up_to_date",
+					"message": "repository branch is already at target commit SHA",
+					"branch":  branch,
+					"sha":     after,
+				})
+				return
+			}
+		}
+	}
 
 	if !s.queue.Enqueue(branch) {
 		w.WriteHeader(http.StatusServiceUnavailable)
