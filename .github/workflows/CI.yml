@@ -61,6 +61,10 @@ jobs:
       - name: Run tests
         run: go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
 
+      - name: Filter coverage report
+        run: |
+          grep -v "github.com/KAnggara75/conflect/cmd/conflect" coverage.out > coverage.tmp && mv coverage.tmp coverage.out || true
+
       - name: Generate coverage report
         run: |
           go tool cover -func=coverage.out

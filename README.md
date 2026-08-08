@@ -13,9 +13,11 @@ A distributed configuration server for managing application configurations acros
 - 📊 **Metrics**: Prometheus metrics for monitoring
 - 🚀 **High Performance**: Efficient caching and concurrent request handling
 
-## Test Coverage
+[![codecov](https://codecov.io/gh/KAnggara75/conflect/branch/main/graph/badge.svg?token=1BTPHQG1DP)](https://app.codecov.io/gh/KAnggara75/conflect)
 
-![Coverage](https://img.shields.io/badge/coverage-32.0%25-yellow)
+[![Codecov Icicle Graph](https://codecov.io/gh/KAnggara75/conflect/graphs/tree.svg?token=1BTPHQG1DP)](https://app.codecov.io/gh/KAnggara75/conflect)
+
+> 📊 View detailed live coverage reports on [Codecov Dashboard](https://app.codecov.io/gh/KAnggara75/conflect).
 
 ### Coverage by Package
 
